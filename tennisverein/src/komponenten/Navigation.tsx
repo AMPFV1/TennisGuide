@@ -9,7 +9,7 @@ function Navigation(): React.JSX.Element {
 
   return (
     <header>
-      <h1>Tennisverein</h1>
+      <h1>TC Netzroller</h1>
       <nav aria-label='Hauptnavigation'>
         <ul>
           <li>
