@@ -7,7 +7,7 @@ function Startseite(): React.JSX.Element {
         <h2>Willkommen beim TC Netzroller!</h2>
         <p>
           Unser Name ist Programm: Bei uns rollt der Ball gerne mal über die
-          Netzkante und manchmal leider auch wieder zurück. Wir sind ein
+          Netzkante – und manchmal leider auch wieder zurück. Wir sind ein
           kleiner, familiärer Verein, in dem Anfänger und alte Hasen gemeinsam
           spielen. Entschuldigungen für Netzroller werden selbstverständlich
           akzeptiert, ernst gemeint sind sie aber nie.
@@ -16,11 +16,11 @@ function Startseite(): React.JSX.Element {
         <h3>Unsere Plätze</h3>
         <ul>
           <li>
-            <strong>3 Außenplätze</strong> (Sand) für alle, die Sonne lieben
+            <strong>3 Außenplätze</strong> (Sand) – für alle, die Sonne lieben
             und rote Socken nicht stören.
           </li>
           <li>
-            <strong>3 Hallenplätze</strong> für Regen, Schnee und Tage, an
+            <strong>3 Hallenplätze</strong> – für Regen, Schnee und Tage, an
             denen der Wind wieder schuld gewesen wäre.
           </li>
         </ul>
@@ -31,7 +31,7 @@ function Startseite(): React.JSX.Element {
         <h3>Unsere Trainer</h3>
         <p>
           Unsere Trainer bringen dir Vorhand, Rückhand, Aufschlag und Volley bei
-          egal ob du gerade anfängst oder schon Turniere spielst. Nur für
+          – egal ob du gerade anfängst oder schon Turniere spielst. Nur für
           Netzroller übernehmen sie keine Garantie.
         </p>
         <p>
@@ -42,7 +42,7 @@ function Startseite(): React.JSX.Element {
         <p>
           Vom Frühjahrs-Cup über die Vereinsmeisterschaft bis zum
           Hallen-Doppel im Winter: Bei uns gibt es jedes Jahr mehrere Turniere.
-          Die wichtigste Regel steht in keinem Regelbuch wer im Finale
+          Die wichtigste Regel steht in keinem Regelbuch – wer im Finale
           verliert, zahlt die erste Runde im Vereinsheim.
         </p>
       </section>
@@ -51,7 +51,7 @@ function Startseite(): React.JSX.Element {
       <p>Ein paar allgemeine Tipps rund ums Tennisspielen:</p>
 
       <section id='grundlagen' aria-label='Bereich Grundlagen'>
-        <h3>Grundlagen</h3>
+        <h2>Grundlagen</h2>
         <article>
           <p>
             Tennis ist ein beliebter Sport, der sowohl im Einzel als auch im
@@ -72,7 +72,7 @@ function Startseite(): React.JSX.Element {
       </section>
 
       <section id='schlaege' aria-label='Bereich Schläge'>
-        <h3>Schläge</h3>
+        <h2>Schläge</h2>
         <article>
           <p>
             Es gibt verschiedene Schläge im Tennis, die jeweils unterschiedliche
@@ -93,7 +93,7 @@ function Startseite(): React.JSX.Element {
       </section>
 
       <section id='training' aria-label='Bereich Training'>
-        <h3>Training</h3>
+        <h2>Training</h2>
         <article>
           <p>
             Regelmäßiges Training ist entscheidend, um die Fähigkeiten im Tennis
