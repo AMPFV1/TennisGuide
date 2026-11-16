@@ -34,9 +34,6 @@ function Startseite(): React.JSX.Element {
           – egal ob du gerade anfängst oder schon Turniere spielst. Nur für
           Netzroller übernehmen sie keine Garantie.
         </p>
-        <p>
-          <Link to='/trainer'>Zur Trainerbuchung</Link>
-        </p>
 
         <h3>Unsere Turniere</h3>
         <p>

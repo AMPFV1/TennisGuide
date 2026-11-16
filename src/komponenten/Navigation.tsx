@@ -1,5 +1,5 @@
 // src/komponenten/Navigation.tsx
-// Kopfbereich mit Menue fuer die drei Seiten
+// Kopfbereich mit Menue fuer die Seiten
 import { NavLink } from 'react-router-dom';
 
 function Navigation(): React.JSX.Element {
@@ -15,11 +15,6 @@ function Navigation(): React.JSX.Element {
           <li>
             <NavLink to='/' end className={linkKlasse}>
               Startseite
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to='/trainer' className={linkKlasse}>
-              Trainer buchen
             </NavLink>
           </li>
           <li>
