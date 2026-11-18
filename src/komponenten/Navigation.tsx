@@ -22,11 +22,6 @@ function Navigation(): React.JSX.Element {
               Platz buchen
             </NavLink>
           </li>
-          <li>
-            <NavLink to='/chat' className={linkKlasse}>
-              Platzwart fragen
-            </NavLink>
-          </li>
         </ul>
       </nav>
     </header>
