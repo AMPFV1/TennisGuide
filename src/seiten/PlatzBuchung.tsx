@@ -7,14 +7,25 @@ import BuchungsListe from '../komponenten/BuchungsListe.tsx';
 import type { Buchung } from '../typen/buchung.ts';
 
 function PlatzBuchung(): React.JSX.Element {
+  const leererEntwurf: Buchungsentwurf = {
+    art: null,
+    spielform: null,
+    datum: null,
+    uhrzeit: null,
+    platzId: null,
+    namen: [],
+    trainerId: null,
+    geraete: [],
+  };
+
   // zum Testen erstmal mit Beispieldaten
-  const [entwurf] = useState<Buchungsentwurf>({
+  const [entwurf, setEntwurf] = useState<Buchungsentwurf>({
     art: 'training',
     spielform: null,
     datum: '2026-11-21',
     uhrzeit: 18,
     platzId: 'halle1',
-    namen: [],
+    namen: ['Jürgen'],
     trainerId: 'max',
     geraete: ['ballmaschine'],
   });
@@ -23,6 +34,28 @@ function PlatzBuchung(): React.JSX.Element {
   const [buchungen, setBuchungen] = useState<Buchung[]>([
     { id: 1, art: 'spielen', datum: '2026-11-22', uhrzeit: 15, platzId: 'halle3', namen: ['Jürgen', 'Tom'], geraete: [] },
   ]);
+
+  const handleBuchen = (): void => {
+    if (!entwurf.art || !entwurf.datum || entwurf.uhrzeit === null || !entwurf.platzId) {
+      return;
+    }
+
+    const neueBuchung: Buchung = {
+      id: Date.now(),
+      art: entwurf.art,
+      datum: entwurf.datum,
+      uhrzeit: entwurf.uhrzeit,
+      platzId: entwurf.platzId,
+      namen: entwurf.namen,
+      geraete: entwurf.geraete,
+    };
+    if (entwurf.trainerId) {
+      neueBuchung.trainerId = entwurf.trainerId;
+    }
+
+    setBuchungen([...buchungen, neueBuchung]);
+    setEntwurf(leererEntwurf);
+  };
 
   const handleStornieren = (id: number): void => {
     setBuchungen(buchungen.filter((b) => b.id !== id));
@@ -38,7 +71,7 @@ function PlatzBuchung(): React.JSX.Element {
       <h3>Wetter</h3>
       <WetterLeiste />
       <Chatbox />
-      <BuchungsEntwurf entwurf={entwurf} />
+      <BuchungsEntwurf entwurf={entwurf} onBuchen={handleBuchen} />
       <BuchungsListe buchungen={buchungen} onStornieren={handleStornieren} />
     </section>
   );

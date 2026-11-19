@@ -16,9 +16,25 @@ export interface Buchungsentwurf {
 
 interface BuchungsEntwurfProps {
   entwurf: Buchungsentwurf;
+  onBuchen: () => void;
 }
 
-function BuchungsEntwurf({ entwurf }: BuchungsEntwurfProps): React.JSX.Element {
+// Prueft, ob alles ausgefuellt ist, was man fuer eine Buchung braucht
+function istVollstaendig(entwurf: Buchungsentwurf): boolean {
+  if (!entwurf.art || !entwurf.datum || entwurf.uhrzeit === null || !entwurf.platzId) {
+    return false;
+  }
+  if (entwurf.art === 'spielen') {
+    // Einzel = 2 Spieler, Doppel = 4 Spieler
+    if (entwurf.spielform === 'einzel') return entwurf.namen.length === 2;
+    if (entwurf.spielform === 'doppel') return entwurf.namen.length === 4;
+    return false;
+  }
+  // Training: 1 bis 4 Personen
+  return entwurf.namen.length >= 1 && entwurf.namen.length <= 4;
+}
+
+function BuchungsEntwurf({ entwurf, onBuchen }: BuchungsEntwurfProps): React.JSX.Element {
   const platz = plaetze.find((p) => p.id === entwurf.platzId);
   const trainer = trainerListe.find((t) => t.id === entwurf.trainerId);
   const geraeteNamen = geraete
@@ -40,7 +56,9 @@ function BuchungsEntwurf({ entwurf }: BuchungsEntwurfProps): React.JSX.Element {
           <p>Geräte: {geraeteNamen.length > 0 ? geraeteNamen.join(', ') : 'keine'}</p>
         </>
       )}
-      <button disabled>Jetzt buchen</button>
+      <button onClick={onBuchen} disabled={!istVollstaendig(entwurf)}>
+        Jetzt buchen
+      </button>
     </div>
   );
 }
