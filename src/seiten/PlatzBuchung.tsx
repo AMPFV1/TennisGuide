@@ -7,6 +7,7 @@ import type { Buchung, Buchungsentwurf } from '../typen/buchung.ts';
 import useAI from '../hooks/useAI.ts';
 import { erstelleBrunoPrompt } from '../utils/brunoPrompt.ts';
 import { leseDatenblock } from '../utils/datenblock.ts';
+import { plaetze } from '../daten/plaetze.ts';
 
 function PlatzBuchung(): React.JSX.Element {
   const leererEntwurf: Buchungsentwurf = {
@@ -60,6 +61,12 @@ function PlatzBuchung(): React.JSX.Element {
 
     setBuchungen([...buchungen, neueBuchung]);
     setEntwurf(leererEntwurf);
+
+    // Bruno Bescheid sagen, dass gebucht wurde
+    const platz = plaetze.find((p) => p.id === neueBuchung.platzId);
+    let text = `Ich habe gerade gebucht: ${platz?.name} am ${neueBuchung.datum} um ${neueBuchung.uhrzeit}:00 Uhr`;
+    text += ` (${neueBuchung.art}) für ${neueBuchung.namen.join(', ')}.`;
+    sendeNachricht(text);
   };
 
   const handleStornieren = (id: number): void => {
