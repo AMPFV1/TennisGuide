@@ -26,10 +26,8 @@ function PlatzBuchung(): React.JSX.Element {
   // jetzt fuellt Bruno den Entwurf, deshalb keine Testdaten mehr
   const [entwurf, setEntwurf] = useState<Buchungsentwurf>(leererEntwurf);
 
-  // meine eigenen Buchungen (zum Testen eine Beispielbuchung)
-  const [buchungen, setBuchungen] = useState<Buchung[]>([
-    { id: 1, art: 'spielen', datum: '2026-11-22', uhrzeit: 15, platzId: 'halle3', namen: ['Jürgen', 'Tom'], geraete: [] },
-  ]);
+  // meine eigenen Buchungen (am Anfang leer)
+  const [buchungen, setBuchungen] = useState<Buchung[]>([]);
 
   // Chat mit Bruno ist jetzt hier, damit Bruno auch meine Buchungen kennt
   const { nachrichten, isStreaming, fehler, sendeNachricht, zuruecksetzen } = useAI({
