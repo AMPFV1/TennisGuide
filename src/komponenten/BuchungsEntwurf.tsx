@@ -1,18 +1,7 @@
 import { plaetze } from '../daten/plaetze.ts';
 import { trainerListe } from '../daten/trainer.ts';
 import { geraete } from '../daten/geraete.ts';
-
-// Was fuer die Buchung schon bekannt ist (null = noch nicht ausgewaehlt)
-export interface Buchungsentwurf {
-  art: 'spielen' | 'training' | null;
-  spielform: 'einzel' | 'doppel' | null;
-  datum: string | null;
-  uhrzeit: number | null;
-  platzId: string | null;
-  namen: string[];
-  trainerId: string | null;
-  geraete: string[];
-}
+import type { Buchungsentwurf } from '../typen/buchung.ts';
 
 interface BuchungsEntwurfProps {
   entwurf: Buchungsentwurf;

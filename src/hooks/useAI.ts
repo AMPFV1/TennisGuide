@@ -5,6 +5,7 @@ import { chatStream } from '../utils/aiStream.ts';
 interface UseAIOptionen {
   systemPrompt?: string;
   maxNachrichten?: number;
+  onAntwortFertig?: (antwort: string) => void; // bekommt die ganze Antwort, wenn sie fertig ist
 }
 
 interface UseAIErgebnis {
@@ -16,7 +17,7 @@ interface UseAIErgebnis {
 }
 
 function useAI(optionen: UseAIOptionen = {}): UseAIErgebnis {
-  const { systemPrompt, maxNachrichten = 20 } = optionen;
+  const { systemPrompt, maxNachrichten = 20, onAntwortFertig } = optionen;
 
   const [nachrichten, setNachrichten] = useState<Nachricht[]>([]);
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
@@ -39,10 +40,14 @@ function useAI(optionen: UseAIOptionen = {}): UseAIErgebnis {
       ? [{ role: 'system', content: systemPrompt }, ...verlauf]
       : verlauf;
 
+    // hier sammeln wir die ganze Antwort mit
+    let ganzeAntwort = '';
+
     await chatStream(
       alleNachrichten,
 
       (text) => {
+        ganzeAntwort += text;
         setNachrichten((prev) => {
           const neu = [...prev];
           const letzte = neu[neu.length - 1];
@@ -51,7 +56,12 @@ function useAI(optionen: UseAIOptionen = {}): UseAIErgebnis {
         });
       },
       // fertig
-      () => setIsStreaming(false),
+      () => {
+        setIsStreaming(false);
+        if (onAntwortFertig) {
+          onAntwortFertig(ganzeAntwort);
+        }
+      },
       // fehler
       (err) => {
         setFehler(err.message);

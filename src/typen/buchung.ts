@@ -27,6 +27,19 @@ export interface Wetter {
   temperatur: number;
 }
 
+// Was fuer die Buchung schon bekannt ist (null = noch nicht ausgewaehlt)
+// (war vorher in BuchungsEntwurf.tsx, wird jetzt aber auch woanders gebraucht)
+export interface Buchungsentwurf {
+  art: 'spielen' | 'training' | null;
+  spielform: 'einzel' | 'doppel' | null;
+  datum: string | null;
+  uhrzeit: number | null;
+  platzId: string | null;
+  namen: string[];
+  trainerId: string | null;
+  geraete: string[];
+}
+
 // Eine Buchung, die schon im System ist
 export interface Buchung {
   id: number;

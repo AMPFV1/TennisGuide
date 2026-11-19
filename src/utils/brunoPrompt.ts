@@ -29,11 +29,16 @@ export function erstelleBrunoPrompt(eigeneBuchungen: Buchung[]): string {
     .map((tag) => `- ${tag.datum}: ${tag.wetter}, ${tag.temperatur} Grad`)
     .join('\n');
 
-  const trainerText = trainerListe
-    .map((t) => `- ${t.name} (${t.fachgebiet}), arbeitet von ${t.vonUhr}:00 bis ${t.bisUhr + 1}:00`)
+  // die ids braucht Bruno fuer den Datenblock
+  const plaetzeText = plaetze
+    .map((p) => `- ${p.name} (id: ${p.id}), ${p.art === 'aussen' ? 'Außenplatz' : 'Halle'}, ${p.belag}`)
     .join('\n');
 
-  const geraeteText = geraete.map((g) => `- ${g.name}: ${g.anzahl} Stück`).join('\n');
+  const trainerText = trainerListe
+    .map((t) => `- ${t.name} (id: ${t.id}, ${t.fachgebiet}), arbeitet von ${t.vonUhr}:00 bis ${t.bisUhr + 1}:00`)
+    .join('\n');
+
+  const geraeteText = geraete.map((g) => `- ${g.name} (id: ${g.id}): ${g.anzahl} Stück`).join('\n');
 
   // Buchungen von den anderen Mitgliedern und meine eigenen
   const belegungText = [...belegungMock, ...eigeneBuchungen].map(buchungAlsText).join('\n');
@@ -56,6 +61,7 @@ DIE PLÄTZE:
 - Außenplätze: Platz 1, Platz 2 und Platz 3 (Sand), nur bei trockenem Wetter bespielbar
 - Hallenplätze: Halle 1, Halle 2 und Halle 3, das ganze Jahr bespielbar
 - Spielzeiten: täglich von 8:00 bis 22:00 Uhr, gebucht wird immer eine ganze Stunde
+${plaetzeText}
 
 PLATZREGELN:
 - Nur mit Tennisschuhen auf den Platz (auf Sand: Sandplatzschuhe)
@@ -86,8 +92,20 @@ RESERVIERUNG:
   an welchem Tag, um welche Uhrzeit, welcher Platz, die Namen aller Personen,
   und beim Training ob ein Trainer und welche Geräte dazu sollen
 - Schlage nur Plätze, Trainer und Geräte vor, die zu der Zeit frei sind
-- Wenn du alles weißt, fasse die Buchung kurz zusammen
-- Du kannst selbst noch nicht buchen. Bestätige nie eine Buchung!
+- Wenn du alles weißt, fasse die Buchung kurz zusammen und sag, dass man rechts
+  bei "Deine Buchung" auf "Jetzt buchen" klicken soll
+- Du kannst selbst nicht buchen. Bestätige nie, dass etwas gebucht ist!
+
+DATENBLOCK (sehr wichtig):
+Hänge an JEDE Antwort ganz am Ende einen Datenblock an, mit allem, was du über die
+gewünschte Buchung schon weißt. Felder, die du noch nicht weißt, lässt du weg.
+Der Block wird nicht angezeigt, also erwähne ihn nie im Text.
+Datum immer als JJJJ-MM-TT, Uhrzeit als Zahl (z.B. 18 für 18:00), für Platz, Trainer
+und Geräte immer die id verwenden.
+Beispiel:
+<daten>{"entwurf":{"art":"spielen","spielform":"einzel","datum":"2026-11-21","uhrzeit":18,"platzId":"halle1","namen":["Anna","Tom"]}}</daten>
+Beispiel Training:
+<daten>{"entwurf":{"art":"training","datum":"2026-11-22","uhrzeit":17,"platzId":"halle2","namen":["Lisa"],"trainerId":"max","geraete":["ballmaschine"]}}</daten>
 
 FORMAT:
 - Antworte immer auf Deutsch

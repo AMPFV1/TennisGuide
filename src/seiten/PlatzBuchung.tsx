@@ -2,9 +2,8 @@ import { useState } from 'react';
 import Chatbox from '../komponenten/Chatbox.tsx';
 import WetterLeiste from '../komponenten/WetterLeiste.tsx';
 import BuchungsEntwurf from '../komponenten/BuchungsEntwurf.tsx';
-import type { Buchungsentwurf } from '../komponenten/BuchungsEntwurf.tsx';
 import BuchungsListe from '../komponenten/BuchungsListe.tsx';
-import type { Buchung } from '../typen/buchung.ts';
+import type { Buchung, Buchungsentwurf } from '../typen/buchung.ts';
 import useAI from '../hooks/useAI.ts';
 import { erstelleBrunoPrompt } from '../utils/brunoPrompt.ts';
 
