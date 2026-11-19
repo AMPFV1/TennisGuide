@@ -5,6 +5,8 @@ import BuchungsEntwurf from '../komponenten/BuchungsEntwurf.tsx';
 import type { Buchungsentwurf } from '../komponenten/BuchungsEntwurf.tsx';
 import BuchungsListe from '../komponenten/BuchungsListe.tsx';
 import type { Buchung } from '../typen/buchung.ts';
+import useAI from '../hooks/useAI.ts';
+import { erstelleBrunoPrompt } from '../utils/brunoPrompt.ts';
 
 function PlatzBuchung(): React.JSX.Element {
   const leererEntwurf: Buchungsentwurf = {
@@ -34,6 +36,11 @@ function PlatzBuchung(): React.JSX.Element {
   const [buchungen, setBuchungen] = useState<Buchung[]>([
     { id: 1, art: 'spielen', datum: '2026-11-22', uhrzeit: 15, platzId: 'halle3', namen: ['Jürgen', 'Tom'], geraete: [] },
   ]);
+
+  // Chat mit Bruno ist jetzt hier, damit Bruno auch meine Buchungen kennt
+  const { nachrichten, isStreaming, fehler, sendeNachricht, zuruecksetzen } = useAI({
+    systemPrompt: erstelleBrunoPrompt(buchungen),
+  });
 
   const handleBuchen = (): void => {
     if (!entwurf.art || !entwurf.datum || entwurf.uhrzeit === null || !entwurf.platzId) {
@@ -70,7 +77,13 @@ function PlatzBuchung(): React.JSX.Element {
       </p>
       <h3>Wetter</h3>
       <WetterLeiste />
-      <Chatbox />
+      <Chatbox
+        nachrichten={nachrichten}
+        isStreaming={isStreaming}
+        fehler={fehler}
+        onSenden={sendeNachricht}
+        onZuruecksetzen={zuruecksetzen}
+      />
       <BuchungsEntwurf entwurf={entwurf} onBuchen={handleBuchen} />
       <BuchungsListe buchungen={buchungen} onStornieren={handleStornieren} />
     </section>
