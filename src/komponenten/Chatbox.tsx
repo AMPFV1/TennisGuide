@@ -1,8 +1,41 @@
 import { useEffect, useRef, useState } from 'react';
 import useAI from '../hooks/useAI.ts';
 import NachrichtBlaeschen from './NachrichtBlaeschen.tsx';
+import { plaetze } from '../daten/plaetze.ts';
+import { trainerListe } from '../daten/trainer.ts';
+import { geraete } from '../daten/geraete.ts';
+import { wetterMock } from '../daten/wetterMock.ts';
+import { belegungMock } from '../daten/belegungMock.ts';
 
 const MAX_ZEICHEN = 500;
+
+// Daten als Text fuer Bruno zusammenbauen, damit er weiss was frei ist
+const heute = new Date().toLocaleDateString('de-AT');
+
+const wetterText = wetterMock
+  .map((tag) => `- ${tag.datum}: ${tag.wetter}, ${tag.temperatur} Grad`)
+  .join('\n');
+
+const trainerText = trainerListe
+  .map((t) => `- ${t.name} (${t.fachgebiet}), arbeitet von ${t.vonUhr}:00 bis ${t.bisUhr + 1}:00`)
+  .join('\n');
+
+const geraeteText = geraete.map((g) => `- ${g.name}: ${g.anzahl} Stück`).join('\n');
+
+const belegungText = belegungMock
+  .map((b) => {
+    const platz = plaetze.find((p) => p.id === b.platzId);
+    let zeile = `- ${b.datum} um ${b.uhrzeit}:00: ${platz?.name} belegt`;
+    if (b.trainerId) {
+      const trainer = trainerListe.find((t) => t.id === b.trainerId);
+      zeile += `, Trainer ${trainer?.name} belegt`;
+    }
+    if (b.geraete.length > 0) {
+      zeile += `, Geräte belegt: ${b.geraete.join(', ')}`;
+    }
+    return zeile;
+  })
+  .join('\n');
 
 const SYSTEM_PROMPT = `
 Du bist "Platzwart Bruno", der Platzwart vom TC Netzroller – seit 30 Jahren im Verein.
@@ -28,9 +61,32 @@ PLATZREGELN:
 - Nach dem Spielen wird der Sandplatz abgezogen und die Linien werden gekehrt
 - Nach starkem Regen sind die Außenplätze gesperrt, bis Bruno sie freigibt
 
+HEUTE IST: ${heute}
+Gebucht werden kann nur von heute bis 7 Tage im Voraus.
+
+WETTER:
+${wetterText}
+Bei Regen sind die Außenplätze gesperrt!
+
+TRAINER:
+${trainerText}
+
+TRAININGSGERÄTE:
+${geraeteText}
+
+SCHON BELEGT (alles andere ist frei):
+${belegungText}
+
 RESERVIERUNG:
-- Die Online-Reservierung ist noch in Arbeit. Du kannst selbst noch KEINE Plätze reservieren.
-- Bestätige nie eine Reservierung! Sag stattdessen freundlich, dass das bald direkt hier im Chat geht.
+- Es gibt zwei Arten: Spielen oder Training
+- Spielen: Einzel (2 Personen) oder Doppel (4 Personen)
+- Training: 1 bis 4 Personen, immer mit Platz, optional mit Trainer und Trainingsgeräten
+- Frage nacheinander alles ab, was noch fehlt: Spielen oder Training, Einzel oder Doppel,
+  an welchem Tag, um welche Uhrzeit, welcher Platz, die Namen aller Personen,
+  und beim Training ob ein Trainer und welche Geräte dazu sollen
+- Schlage nur Plätze, Trainer und Geräte vor, die zu der Zeit frei sind
+- Wenn du alles weißt, fasse die Buchung kurz zusammen
+- Du kannst selbst noch nicht buchen. Bestätige nie eine Buchung!
 
 FORMAT:
 - Antworte immer auf Deutsch
