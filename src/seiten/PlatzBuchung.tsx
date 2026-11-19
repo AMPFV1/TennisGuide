@@ -6,6 +6,7 @@ import BuchungsListe from '../komponenten/BuchungsListe.tsx';
 import type { Buchung, Buchungsentwurf } from '../typen/buchung.ts';
 import useAI from '../hooks/useAI.ts';
 import { erstelleBrunoPrompt } from '../utils/brunoPrompt.ts';
+import { leseDatenblock } from '../utils/datenblock.ts';
 
 function PlatzBuchung(): React.JSX.Element {
   const leererEntwurf: Buchungsentwurf = {
@@ -19,17 +20,8 @@ function PlatzBuchung(): React.JSX.Element {
     geraete: [],
   };
 
-  // zum Testen erstmal mit Beispieldaten
-  const [entwurf, setEntwurf] = useState<Buchungsentwurf>({
-    art: 'training',
-    spielform: null,
-    datum: '2026-11-21',
-    uhrzeit: 18,
-    platzId: 'halle1',
-    namen: ['Jürgen'],
-    trainerId: 'max',
-    geraete: ['ballmaschine'],
-  });
+  // jetzt fuellt Bruno den Entwurf, deshalb keine Testdaten mehr
+  const [entwurf, setEntwurf] = useState<Buchungsentwurf>(leererEntwurf);
 
   // meine eigenen Buchungen (zum Testen eine Beispielbuchung)
   const [buchungen, setBuchungen] = useState<Buchung[]>([
@@ -39,6 +31,13 @@ function PlatzBuchung(): React.JSX.Element {
   // Chat mit Bruno ist jetzt hier, damit Bruno auch meine Buchungen kennt
   const { nachrichten, isStreaming, fehler, sendeNachricht, zuruecksetzen } = useAI({
     systemPrompt: erstelleBrunoPrompt(buchungen),
+    // wenn Bruno fertig ist, seinen Datenblock in den Entwurf uebernehmen
+    onAntwortFertig: (antwort) => {
+      const daten = leseDatenblock(antwort);
+      if (daten) {
+        setEntwurf((prev) => ({ ...prev, ...daten }));
+      }
+    },
   });
 
   const handleBuchen = (): void => {
@@ -71,8 +70,8 @@ function PlatzBuchung(): React.JSX.Element {
     <section>
       <h2>Platz buchen</h2>
       <p>
-        Fragen zu unseren Plätzen? Unser Platzwart Bruno hilft dir gerne weiter.
-        Bald kann er auch direkt für dich reservieren.
+        Sag unserem Platzwart Bruno, wann du spielen oder trainieren willst. Er
+        trägt alles bei "Deine Buchung" ein, du musst nur noch auf "Jetzt buchen" klicken.
       </p>
       <h3>Wetter</h3>
       <WetterLeiste />
