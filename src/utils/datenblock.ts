@@ -1,7 +1,7 @@
 // Bruno haengt am Ende seiner Antwort einen Block an:
 // <daten>{"entwurf": { ... }}</daten>
 // Der soll im Chat nicht zu sehen sein, aber wir lesen ihn aus.
-import type { Buchungsentwurf } from '../typen/buchung.ts';
+import type { Buchungsentwurf, Kachel } from '../typen/buchung.ts';
 
 const START = '<daten>';
 
@@ -22,20 +22,22 @@ export function entferneDatenblock(text: string): string {
   return text;
 }
 
-// Liest den Block aus und gibt nur die Felder zurueck, die auch Sinn ergeben
-export function leseDatenblock(text: string): Partial<Buchungsentwurf> | null {
+// JSON aus dem Block holen (wird fuer Entwurf und Kacheln gebraucht)
+function holeJson(text: string): any {
   const treffer = text.match(/<daten>([\s\S]*?)<\/daten>/);
   if (!treffer) return null;
 
   const jsonText = treffer[1].replace(/```json|```/g, '').trim();
-
-  let daten;
   try {
-    daten = JSON.parse(jsonText);
+    return JSON.parse(jsonText);
   } catch {
     return null;
   }
+}
 
+// Liest den Block aus und gibt nur die Felder zurueck, die auch Sinn ergeben
+export function leseDatenblock(text: string): Partial<Buchungsentwurf> | null {
+  const daten = holeJson(text);
   const e = daten?.entwurf;
   if (!e || typeof e !== 'object') return null;
 
@@ -51,4 +53,35 @@ export function leseDatenblock(text: string): Partial<Buchungsentwurf> | null {
   if (Array.isArray(e.geraete)) ergebnis.geraete = e.geraete.filter((g: unknown) => typeof g === 'string');
 
   return ergebnis;
+}
+
+// Liest die Kacheln aus dem Block (Vorschlaege zum Anklicken)
+export function leseKacheln(text: string): Kachel[] {
+  const daten = holeJson(text);
+  if (!daten || !Array.isArray(daten.kacheln)) return [];
+
+  const kacheln: Kachel[] = [];
+  for (const k of daten.kacheln) {
+    if (!k || typeof k !== 'object') continue;
+
+    if (k.typ === 'art' && (k.art === 'spielen' || k.art === 'training')) {
+      kacheln.push({ typ: 'art', art: k.art });
+    } else if (k.typ === 'spielform' && (k.spielform === 'einzel' || k.spielform === 'doppel')) {
+      kacheln.push({ typ: 'spielform', spielform: k.spielform });
+    } else if (
+      k.typ === 'termin' &&
+      typeof k.datum === 'string' &&
+      typeof k.uhrzeit === 'number' &&
+      typeof k.platzId === 'string'
+    ) {
+      kacheln.push({ typ: 'termin', datum: k.datum, uhrzeit: k.uhrzeit, platzId: k.platzId });
+    } else if (k.typ === 'trainer' && (typeof k.trainerId === 'string' || k.trainerId === null)) {
+      kacheln.push({ typ: 'trainer', trainerId: k.trainerId });
+    } else if (k.typ === 'geraet' && typeof k.geraetId === 'string') {
+      kacheln.push({ typ: 'geraet', geraetId: k.geraetId });
+    }
+  }
+
+  // nicht zu viele, sonst wird es unuebersichtlich
+  return kacheln.slice(0, 6);
 }

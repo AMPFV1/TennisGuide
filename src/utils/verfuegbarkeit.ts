@@ -1,6 +1,6 @@
 // Prueft, ob eine Buchung wirklich moeglich ist
 // (Bruno kann sich verrechnen, deshalb prueft hier nochmal der Code)
-import type { Buchung, Buchungsentwurf } from '../typen/buchung.ts';
+import type { Buchung, Buchungsentwurf, Kachel } from '../typen/buchung.ts';
 import { plaetze } from '../daten/plaetze.ts';
 import { trainerListe } from '../daten/trainer.ts';
 import { geraete } from '../daten/geraete.ts';
@@ -61,6 +61,7 @@ export function istTrainerFrei(
   );
 }
 
+
 // wie viele Stueck von einem Geraet sind zu der Zeit noch frei
 export function freieGeraete(
   geraetId: string,
@@ -108,4 +109,86 @@ export function pruefeEntwurf(entwurf: Buchungsentwurf, alleBuchungen: Buchung[]
     }
   }
   return null;
+}
+
+// Ist eine Kachel von Bruno ueberhaupt moeglich?
+// (Trainer und Geraete kann man erst pruefen, wenn Datum und Uhrzeit feststehen)
+export function istKachelGueltig(
+  kachel: Kachel,
+  entwurf: Buchungsentwurf,
+  alleBuchungen: Buchung[]
+): boolean {
+  if (kachel.typ === 'termin') {
+    const platzGibtEs = plaetze.some((p) => p.id === kachel.platzId);
+    if (!platzGibtEs) return false;
+    if (!istImBuchungszeitraum(kachel.datum)) return false;
+    if (kachel.uhrzeit < 8 || kachel.uhrzeit > 21) return false;
+    if (istUhrzeitVorbei(kachel.datum, kachel.uhrzeit)) return false;
+    if (istAussenplatzGesperrt(kachel.platzId, kachel.datum)) return false;
+    if (!istPlatzFrei(kachel.platzId, kachel.datum, kachel.uhrzeit, alleBuchungen)) return false;
+    // wenn schon ein Trainer ausgesucht ist, muss der auch Zeit haben
+    if (entwurf.trainerId && !istTrainerFrei(entwurf.trainerId, kachel.datum, kachel.uhrzeit, alleBuchungen)) {
+      return false;
+    }
+    return true;
+  }
+
+  const { datum, uhrzeit } = entwurf;
+
+  if (kachel.typ === 'trainer') {
+    if (kachel.trainerId === null) return true; // ohne Trainer geht immer
+    if (!trainerListe.some((t) => t.id === kachel.trainerId)) return false;
+    if (!datum || uhrzeit === null) return true;
+    return istTrainerFrei(kachel.trainerId, datum, uhrzeit, alleBuchungen);
+  }
+
+  if (kachel.typ === 'geraet') {
+    if (!geraete.some((g) => g.id === kachel.geraetId)) return false;
+    if (!datum || uhrzeit === null) return true;
+    return freieGeraete(kachel.geraetId, datum, uhrzeit, alleBuchungen) > 0;
+  }
+
+  // Spielen/Training und Einzel/Doppel geht immer
+  return true;
+}
+
+// Freie Termine an einem Tag ab einer Uhrzeit (pro Stunde der erste freie Platz)
+export function freieTermine(
+  datum: string,
+  abUhr: number,
+  entwurf: Buchungsentwurf,
+  alleBuchungen: Buchung[],
+  anzahl: number
+): Kachel[] {
+  const ergebnis: Kachel[] = [];
+  for (let uhr = Math.max(abUhr, 8); uhr <= 21 && ergebnis.length < anzahl; uhr++) {
+    for (const platz of plaetze) {
+      const kachel: Kachel = { typ: 'termin', datum, uhrzeit: uhr, platzId: platz.id };
+      if (istKachelGueltig(kachel, entwurf, alleBuchungen)) {
+        ergebnis.push(kachel);
+        break;
+      }
+    }
+  }
+  return ergebnis;
+}
+
+// Kombination: Wenn Bruno nur belegte Termine vorschlaegt, rechnen wir selbst
+// freie Termine fuer denselben Tag aus
+export function ergaenzeKacheln(
+  kacheln: Kachel[],
+  entwurf: Buchungsentwurf,
+  alleBuchungen: Buchung[]
+): Kachel[] {
+  const termine = kacheln.filter((k) => k.typ === 'termin');
+  if (termine.length === 0) return kacheln;
+
+  const gueltige = termine.filter((k) => istKachelGueltig(k, entwurf, alleBuchungen));
+  if (gueltige.length > 0) return kacheln;
+
+  const erster = termine[0];
+  if (erster.typ !== 'termin') return kacheln;
+  const ersatz = freieTermine(erster.datum, erster.uhrzeit, entwurf, alleBuchungen, 3);
+  // die falschen Termine bleiben (ausgegraut) drin, dahinter die freien
+  return [...kacheln, ...ersatz];
 }

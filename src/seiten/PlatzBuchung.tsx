@@ -3,13 +3,16 @@ import Chatbox from '../komponenten/Chatbox.tsx';
 import WetterLeiste from '../komponenten/WetterLeiste.tsx';
 import BuchungsEntwurf from '../komponenten/BuchungsEntwurf.tsx';
 import BuchungsListe from '../komponenten/BuchungsListe.tsx';
-import type { Buchung, Buchungsentwurf } from '../typen/buchung.ts';
+import KachelListe from '../komponenten/KachelListe.tsx';
+import type { Buchung, Buchungsentwurf, Kachel } from '../typen/buchung.ts';
 import useAI from '../hooks/useAI.ts';
 import { erstelleBrunoPrompt } from '../utils/brunoPrompt.ts';
-import { leseDatenblock } from '../utils/datenblock.ts';
+import { leseDatenblock, leseKacheln } from '../utils/datenblock.ts';
 import { plaetze } from '../daten/plaetze.ts';
+import { trainerListe } from '../daten/trainer.ts';
+import { geraete } from '../daten/geraete.ts';
 import { belegungMock } from '../daten/belegungMock.ts';
-import { pruefeEntwurf } from '../utils/verfuegbarkeit.ts';
+import { ergaenzeKacheln, pruefeEntwurf } from '../utils/verfuegbarkeit.ts';
 
 function PlatzBuchung(): React.JSX.Element {
   const leererEntwurf: Buchungsentwurf = {
@@ -29,11 +32,20 @@ function PlatzBuchung(): React.JSX.Element {
   // meine eigenen Buchungen (am Anfang leer)
   const [buchungen, setBuchungen] = useState<Buchung[]>([]);
 
+  // Vorschlaege von Bruno zum Anklicken
+  const [kacheln, setKacheln] = useState<Kachel[]>([]);
+
+  // Buchungen von allen anderen + meine (fuer die Pruefungen)
+  const alleBuchungen = [...belegungMock, ...buchungen];
+
   // Chat mit Bruno ist jetzt hier, damit Bruno auch meine Buchungen kennt
   const { nachrichten, isStreaming, fehler, sendeNachricht, zuruecksetzen } = useAI({
     systemPrompt: erstelleBrunoPrompt(buchungen),
     // wenn Bruno fertig ist, seinen Datenblock in den Entwurf uebernehmen
     onAntwortFertig: (antwort) => {
+      // neue Kacheln (oder keine) von Bruno
+      setKacheln(leseKacheln(antwort));
+
       const daten = leseDatenblock(antwort);
       if (daten) {
         // vorher wurde zusammengefuehrt ({ ...prev, ...daten }), dabei sind aber alte
@@ -61,7 +73,7 @@ function PlatzBuchung(): React.JSX.Element {
     const platz = plaetze.find((p) => p.id === entwurf.platzId);
 
     // pruefen ob wirklich alles frei ist (Buchungen von allen + meine)
-    const meldung = pruefeEntwurf(entwurf, [...belegungMock, ...buchungen]);
+    const meldung = pruefeEntwurf(entwurf, alleBuchungen);
     if (meldung) {
       // statt roter Meldung sagen wir es Bruno, der sucht dann was anderes
       sendeNachricht(
@@ -70,8 +82,11 @@ function PlatzBuchung(): React.JSX.Element {
       return;
     }
 
+    // naechste freie Nummer (hoechste id + 1)
+    const neueId = buchungen.length > 0 ? Math.max(...buchungen.map((b) => b.id)) + 1 : 1;
+
     const neueBuchung: Buchung = {
-      id: Date.now(),
+      id: neueId,
       art: entwurf.art,
       datum: entwurf.datum,
       uhrzeit: entwurf.uhrzeit,
@@ -92,10 +107,56 @@ function PlatzBuchung(): React.JSX.Element {
     sendeNachricht(text);
   };
 
-  // "Neues Match": Chat UND Entwurf leeren
+  // "Neues Match": Chat, Entwurf und Kacheln leeren
   const handleNeuesMatch = (): void => {
     zuruecksetzen();
     setEntwurf(leererEntwurf);
+    setKacheln([]);
+  };
+
+  // wenn man selber was tippt, sind die alten Kacheln nicht mehr aktuell
+  const handleSenden = async (text: string): Promise<void> => {
+    setKacheln([]);
+    await sendeNachricht(text);
+  };
+
+  // Klick auf eine Kachel: in den Entwurf eintragen und Bruno Bescheid sagen
+  const handleKachelKlick = (kachel: Kachel): void => {
+    const neu: Buchungsentwurf = { ...entwurf };
+    let text = 'Ich nehme: ';
+
+    if (kachel.typ === 'art') {
+      neu.art = kachel.art;
+      if (kachel.art === 'training') {
+        neu.spielform = null;
+      } else {
+        neu.trainerId = null;
+        neu.geraete = [];
+      }
+      text += kachel.art === 'spielen' ? 'Spielen' : 'Training';
+    } else if (kachel.typ === 'spielform') {
+      neu.spielform = kachel.spielform;
+      text += kachel.spielform === 'einzel' ? 'Einzel' : 'Doppel';
+    } else if (kachel.typ === 'termin') {
+      neu.datum = kachel.datum;
+      neu.uhrzeit = kachel.uhrzeit;
+      neu.platzId = kachel.platzId;
+      const platz = plaetze.find((p) => p.id === kachel.platzId);
+      text += `${platz?.name} am ${kachel.datum} um ${kachel.uhrzeit}:00 Uhr`;
+    } else if (kachel.typ === 'trainer') {
+      neu.trainerId = kachel.trainerId;
+      const trainer = trainerListe.find((t) => t.id === kachel.trainerId);
+      text += trainer ? `Trainer ${trainer.name}` : 'ohne Trainer';
+    } else {
+      if (!neu.geraete.includes(kachel.geraetId)) {
+        neu.geraete = [...neu.geraete, kachel.geraetId];
+      }
+      const geraet = geraete.find((g) => g.id === kachel.geraetId);
+      text += `das Gerät ${geraet?.name}`;
+    }
+
+    setEntwurf(neu);
+    handleSenden(text);
   };
 
   const handleStornieren = (id: number): void => {
@@ -115,9 +176,16 @@ function PlatzBuchung(): React.JSX.Element {
         nachrichten={nachrichten}
         isStreaming={isStreaming}
         fehler={fehler}
-        onSenden={sendeNachricht}
+        onSenden={handleSenden}
         onZuruecksetzen={handleNeuesMatch}
-      />
+      >
+        <KachelListe
+          kacheln={ergaenzeKacheln(kacheln, entwurf, alleBuchungen)}
+          entwurf={entwurf}
+          alleBuchungen={alleBuchungen}
+          onKlick={handleKachelKlick}
+        />
+      </Chatbox>
       <BuchungsEntwurf entwurf={entwurf} onBuchen={handleBuchen} isStreaming={isStreaming} />
       <BuchungsListe buchungen={buchungen} onStornieren={handleStornieren} />
     </section>

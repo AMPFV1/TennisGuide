@@ -12,6 +12,7 @@ interface ChatboxProps {
   fehler: string | null;
   onSenden: (text: string) => Promise<void>;
   onZuruecksetzen: () => void;
+  children?: React.ReactNode; // wird unter der letzten Nachricht angezeigt (z.B. Kacheln)
 }
 
 function Chatbox({
@@ -20,14 +21,16 @@ function Chatbox({
   fehler,
   onSenden,
   onZuruecksetzen,
+  children,
 }: ChatboxProps): React.JSX.Element {
   const [eingabe, setEingabe] = useState<string>('');
 
   const endeRef = useRef<HTMLDivElement | null>(null);
 
+  // auch scrollen, wenn die Kacheln auftauchen (isStreaming wird false)
   useEffect(() => {
     endeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }, [nachrichten]);
+  }, [nachrichten, isStreaming]);
 
   const handleSenden = async (): Promise<void> => {
     if (!eingabe.trim()) return;
@@ -60,6 +63,7 @@ function Chatbox({
           </p>
         )}
 
+
         {nachrichten.map((nachricht, index) =>
           isTippt && index === nachrichten.length - 1 ? null : (
             <NachrichtBlaeschen key={index} nachricht={nachricht} />
@@ -67,6 +71,9 @@ function Chatbox({
         )}
 
         {isTippt && <p className='chatbox-tippt'>Bruno stellt den Rechen weg …</p>}
+
+        {/* Kacheln erst zeigen, wenn Bruno fertig geschrieben hat */}
+        {!isStreaming && children}
 
         {fehler && <p className='fehler'>🚫 Doppelfehler! {fehler}</p>}
 

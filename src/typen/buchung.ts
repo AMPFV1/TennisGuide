@@ -40,6 +40,14 @@ export interface Buchungsentwurf {
   geraete: string[];
 }
 
+// Eine Kachel, die Bruno vorschlaegt und die man anklicken kann
+export type Kachel =
+  | { typ: 'art'; art: 'spielen' | 'training' }
+  | { typ: 'spielform'; spielform: 'einzel' | 'doppel' }
+  | { typ: 'termin'; datum: string; uhrzeit: number; platzId: string }
+  | { typ: 'trainer'; trainerId: string | null } // null = ohne Trainer
+  | { typ: 'geraet'; geraetId: string };
+
 // Eine Buchung, die schon im System ist
 export interface Buchung {
   id: number;
