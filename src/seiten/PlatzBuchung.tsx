@@ -36,7 +36,19 @@ function PlatzBuchung(): React.JSX.Element {
     onAntwortFertig: (antwort) => {
       const daten = leseDatenblock(antwort);
       if (daten) {
-        setEntwurf((prev) => ({ ...prev, ...daten }));
+        // vorher wurde zusammengefuehrt ({ ...prev, ...daten }), dabei sind aber alte
+        // Sachen haengen geblieben (z.B. Trainer, obwohl man jetzt spielen will).
+        // Darum jetzt komplett ersetzen, Bruno schickt immer alles mit.
+        const neu: Buchungsentwurf = { ...leererEntwurf, ...daten };
+
+        // was nicht zur Art passt, sicherheitshalber rausnehmen
+        if (neu.art === 'training') {
+          neu.spielform = null;
+        } else {
+          neu.trainerId = null;
+          neu.geraete = [];
+        }
+        setEntwurf(neu);
       }
     },
   });
@@ -80,6 +92,12 @@ function PlatzBuchung(): React.JSX.Element {
     sendeNachricht(text);
   };
 
+  // "Neues Match": Chat UND Entwurf leeren
+  const handleNeuesMatch = (): void => {
+    zuruecksetzen();
+    setEntwurf(leererEntwurf);
+  };
+
   const handleStornieren = (id: number): void => {
     setBuchungen(buchungen.filter((b) => b.id !== id));
   };
@@ -98,7 +116,7 @@ function PlatzBuchung(): React.JSX.Element {
         isStreaming={isStreaming}
         fehler={fehler}
         onSenden={sendeNachricht}
-        onZuruecksetzen={zuruecksetzen}
+        onZuruecksetzen={handleNeuesMatch}
       />
       <BuchungsEntwurf entwurf={entwurf} onBuchen={handleBuchen} isStreaming={isStreaming} />
       <BuchungsListe buchungen={buchungen} onStornieren={handleStornieren} />

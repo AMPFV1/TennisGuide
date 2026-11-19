@@ -23,7 +23,31 @@ function buchungAlsText(b: Buchung): string {
 }
 
 export function erstelleBrunoPrompt(eigeneBuchungen: Buchung[]): string {
-  const heute = new Date().toLocaleDateString('de-AT');
+  // Datum UND Uhrzeit, sonst weiss Bruno nicht was "in einer Stunde" heisst
+  const jetzt = new Date();
+  const heute = jetzt.toLocaleDateString('de-AT', {
+    weekday: 'long',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+  const uhrzeit = jetzt.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' });
+
+  // die naechsten 8 Tage mit Wochentag, damit Bruno "am Freitag" richtig zuordnet
+  const kalenderZeilen: string[] = [];
+  for (let i = 0; i <= 7; i++) {
+    const tag = new Date();
+    tag.setDate(jetzt.getDate() + i);
+    const wochentag = tag.toLocaleDateString('de-AT', { weekday: 'long' });
+    const jahr = tag.getFullYear();
+    const monat = String(tag.getMonth() + 1).padStart(2, '0');
+    const t = String(tag.getDate()).padStart(2, '0');
+    let zeile = `- ${wochentag}: ${jahr}-${monat}-${t}`;
+    if (i === 0) zeile += ' (heute)';
+    if (i === 1) zeile += ' (morgen)';
+    kalenderZeilen.push(zeile);
+  }
+  const kalenderText = kalenderZeilen.join('\n');
 
   const wetterText = wetterMock
     .map((tag) => `- ${tag.datum}: ${tag.wetter}, ${tag.temperatur} Grad`)
@@ -69,7 +93,18 @@ PLATZREGELN:
 - Nach starkem Regen sind die Außenplätze gesperrt, bis Bruno sie freigibt
 
 HEUTE IST: ${heute}
+JETZT IST ES: ${uhrzeit} Uhr
 Gebucht werden kann nur von heute bis 7 Tage im Voraus.
+Heute kann nur noch eine volle Stunde gebucht werden, die noch nicht angefangen hat.
+Wenn jemand "jetzt", "gleich" oder "in der nächsten Stunde" sagt, nimm die nächste volle Stunde.
+
+KALENDER (buchbare Tage):
+${kalenderText}
+
+BEGRÜSSUNG:
+Begrüße passend zur Uhrzeit (z.B. "Guten Morgen", "Mahlzeit", "Guten Abend").
+Wenn es schon nach 21:00 Uhr ist, mach einen Witz darüber, dass du gerade die Lichter
+ausmachen wolltest – heute geht nichts mehr, aber morgen schon.
 
 WETTER:
 ${wetterText}
@@ -107,6 +142,10 @@ RESERVIERUNG:
 DATENBLOCK (sehr wichtig):
 Hänge an JEDE Antwort ganz am Ende einen Datenblock an, mit allem, was du über die
 gewünschte Buchung schon weißt. Felder, die du noch nicht weißt, lässt du weg.
+Schicke IMMER den kompletten Stand, also auch alles, was du schon in früheren Antworten
+geschickt hast – der alte Block wird nämlich komplett ersetzt!
+Wenn sich etwas ändert (z.B. von Training zu Spielen oder kein Trainer mehr), lass die
+Felder weg, die nicht mehr gelten.
 Der Block wird nicht angezeigt, also erwähne ihn nie im Text.
 Datum immer als JJJJ-MM-TT, Uhrzeit als Zahl (z.B. 18 für 18:00), für Platz, Trainer
 und Geräte immer die id verwenden.
