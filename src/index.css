@@ -71,3 +71,81 @@ nav a.aktiv {
 .wetter-icon {
     font-size: 1.5rem;
 }
+
+/* Text nur fuer Screenreader, sonst unsichtbar */
+.visuell-versteckt {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+}
+
+/* Chat mit Platzwart Bruno */
+.chatbox {
+    display: flex;
+    flex-direction: column;
+    max-width: 700px;
+    height: 500px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+}
+.chatbox-kopf {
+    background-color: #444;
+    color: #fff;
+    padding: 0.5rem 1rem;
+}
+.chatbox-kopf h2 {
+    margin: 0;
+}
+.chatbox-verlauf {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+}
+.blaeschen-zeile {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+.blaeschen-zeile--benutzer {
+    justify-content: flex-end;
+}
+.blaeschen {
+    max-width: 75%;
+    padding: 0.5rem;
+    border-radius: 6px;
+}
+.blaeschen p {
+    margin: 0;
+    white-space: pre-wrap;
+}
+.blaeschen--benutzer {
+    background-color: #d6e9ff;
+}
+.blaeschen--platzwart {
+    background-color: #eee;
+}
+.chatbox-tippt {
+    font-style: italic;
+    color: #777;
+}
+.fehler {
+    color: #b3261e;
+}
+.chatbox-eingabe {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-top: 1px solid #ddd;
+}
+.chatbox-eingabe input {
+    flex: 1;
+}
+.chatbox-zaehler {
+    margin: 0;
+    padding: 0 0.5rem 0.5rem;
+    font-size: 0.8rem;
+    color: #777;
+    text-align: right;
+}
