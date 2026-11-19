@@ -6,6 +6,7 @@ import type { Buchungsentwurf } from '../typen/buchung.ts';
 interface BuchungsEntwurfProps {
   entwurf: Buchungsentwurf;
   onBuchen: () => void;
+  isStreaming: boolean; // solange Bruno schreibt, nicht buchen
 }
 
 // Prueft, ob alles ausgefuellt ist, was man fuer eine Buchung braucht
@@ -23,7 +24,7 @@ function istVollstaendig(entwurf: Buchungsentwurf): boolean {
   return entwurf.namen.length >= 1 && entwurf.namen.length <= 4;
 }
 
-function BuchungsEntwurf({ entwurf, onBuchen }: BuchungsEntwurfProps): React.JSX.Element {
+function BuchungsEntwurf({ entwurf, onBuchen, isStreaming }: BuchungsEntwurfProps): React.JSX.Element {
   const platz = plaetze.find((p) => p.id === entwurf.platzId);
   const trainer = trainerListe.find((t) => t.id === entwurf.trainerId);
   const geraeteNamen = geraete
@@ -45,8 +46,8 @@ function BuchungsEntwurf({ entwurf, onBuchen }: BuchungsEntwurfProps): React.JSX
           <p>Geräte: {geraeteNamen.length > 0 ? geraeteNamen.join(', ') : 'keine'}</p>
         </>
       )}
-      <button onClick={onBuchen} disabled={!istVollstaendig(entwurf)}>
-        Jetzt buchen
+      <button onClick={onBuchen} disabled={!istVollstaendig(entwurf) || isStreaming}>
+        {isStreaming ? 'Bruno schreibt noch …' : 'Jetzt buchen'}
       </button>
     </div>
   );

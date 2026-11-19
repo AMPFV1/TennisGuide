@@ -8,6 +8,8 @@ import useAI from '../hooks/useAI.ts';
 import { erstelleBrunoPrompt } from '../utils/brunoPrompt.ts';
 import { leseDatenblock } from '../utils/datenblock.ts';
 import { plaetze } from '../daten/plaetze.ts';
+import { belegungMock } from '../daten/belegungMock.ts';
+import { pruefeEntwurf } from '../utils/verfuegbarkeit.ts';
 
 function PlatzBuchung(): React.JSX.Element {
   const leererEntwurf: Buchungsentwurf = {
@@ -46,6 +48,18 @@ function PlatzBuchung(): React.JSX.Element {
       return;
     }
 
+    const platz = plaetze.find((p) => p.id === entwurf.platzId);
+
+    // pruefen ob wirklich alles frei ist (Buchungen von allen + meine)
+    const meldung = pruefeEntwurf(entwurf, [...belegungMock, ...buchungen]);
+    if (meldung) {
+      // statt roter Meldung sagen wir es Bruno, der sucht dann was anderes
+      sendeNachricht(
+        `Die Buchung hat nicht geklappt: ${platz?.name} am ${entwurf.datum} um ${entwurf.uhrzeit}:00 Uhr – ${meldung}`
+      );
+      return;
+    }
+
     const neueBuchung: Buchung = {
       id: Date.now(),
       art: entwurf.art,
@@ -63,7 +77,6 @@ function PlatzBuchung(): React.JSX.Element {
     setEntwurf(leererEntwurf);
 
     // Bruno Bescheid sagen, dass gebucht wurde
-    const platz = plaetze.find((p) => p.id === neueBuchung.platzId);
     let text = `Ich habe gerade gebucht: ${platz?.name} am ${neueBuchung.datum} um ${neueBuchung.uhrzeit}:00 Uhr`;
     text += ` (${neueBuchung.art}) für ${neueBuchung.namen.join(', ')}.`;
     sendeNachricht(text);
@@ -89,7 +102,7 @@ function PlatzBuchung(): React.JSX.Element {
         onSenden={sendeNachricht}
         onZuruecksetzen={zuruecksetzen}
       />
-      <BuchungsEntwurf entwurf={entwurf} onBuchen={handleBuchen} />
+      <BuchungsEntwurf entwurf={entwurf} onBuchen={handleBuchen} isStreaming={isStreaming} />
       <BuchungsListe buchungen={buchungen} onStornieren={handleStornieren} />
     </section>
   );
