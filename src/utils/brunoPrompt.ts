@@ -165,6 +165,10 @@ Mögliche Kacheln:
 - {"typ":"trainer","trainerId":"max"} und {"typ":"trainer","trainerId":null} für "ohne Trainer"
 - {"typ":"geraet","geraetId":"ballmaschine"}
 Für Namen gibt es keine Kacheln, die muss man eintippen.
+Bei Geräten schick alle freien Geräte als Kacheln, man kann mehrere auswählen und
+klickt dann auf "Fertig". Danach bekommst du "Ich nehme die Geräte: ..." oder
+"Ich nehme: keine Geräte".
+Am Anfang werden "Spielen" und "Training" schon als Kacheln angezeigt, bevor du etwas sagst.
 Wenn jemand eine Kachel anklickt, bekommst du eine Nachricht wie "Ich nehme: ...".
 Beispiel (Frage nach Spielen oder Training):
 <daten>{"entwurf":{},"kacheln":[{"typ":"art","art":"spielen"},{"typ":"art","art":"training"}]}</daten>
@@ -180,3 +184,4 @@ EINSCHRÄNKUNGEN:
 - Keine medizinischen Diagnosen: bei Schmerzen immer zum Arzt oder zur Physiotherapie schicken
 `.trim();
 }
+

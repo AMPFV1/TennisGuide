@@ -10,8 +10,8 @@ interface KachelListeProps {
   entwurf: Buchungsentwurf;
   alleBuchungen: Buchung[];
   onKlick: (kachel: Kachel) => void;
+  onGeraeteFertig?: () => void; // Button "Fertig" bei den Geraeten
 }
-
 
 // Text, der auf der Kachel steht
 function kachelText(kachel: Kachel, entwurf: Buchungsentwurf, alleBuchungen: Buchung[]): string {
@@ -51,26 +51,50 @@ function kachelText(kachel: Kachel, entwurf: Buchungsentwurf, alleBuchungen: Buc
   return text;
 }
 
-function KachelListe({ kacheln, entwurf, alleBuchungen, onKlick }: KachelListeProps): React.JSX.Element | null {
+function KachelListe({
+  kacheln,
+  entwurf,
+  alleBuchungen,
+  onKlick,
+  onGeraeteFertig,
+}: KachelListeProps): React.JSX.Element | null {
   if (kacheln.length === 0) return null;
+
+  // bei Geraeten kann man mehrere auswaehlen und dann auf "Fertig" klicken
+  const hatGeraete = kacheln.some((k) => k.typ === 'geraet');
 
   return (
     <div className='kachel-liste'>
       {kacheln.map((kachel, index) => {
-        const gueltig = istKachelGueltig(kachel, entwurf, alleBuchungen);
+        const ausgewaehlt = kachel.typ === 'geraet' && entwurf.geraete.includes(kachel.geraetId);
+        // ein ausgewaehltes Geraet muss man immer wieder abwaehlen koennen
+        const gueltig = ausgewaehlt || istKachelGueltig(kachel, entwurf, alleBuchungen);
+
+        let klasse = 'kachel';
+        if (!gueltig) klasse += ' kachel--belegt';
+        if (ausgewaehlt) klasse += ' kachel--gewaehlt';
+
         return (
           // Index als key ist ok, die Liste wird jedes Mal komplett neu gesetzt
           <button
             key={index}
-            className={gueltig ? 'kachel' : 'kachel kachel--belegt'}
+            className={klasse}
             onClick={() => onKlick(kachel)}
             disabled={!gueltig}
+            aria-pressed={kachel.typ === 'geraet' ? ausgewaehlt : undefined}
           >
+            {ausgewaehlt && '✔ '}
             {kachelText(kachel, entwurf, alleBuchungen)}
             {!gueltig && <small> – schon weg, Bruno hat Sand in den Augen 😅</small>}
           </button>
         );
       })}
+
+      {hatGeraete && onGeraeteFertig && (
+        <button className='kachel kachel--fertig' onClick={onGeraeteFertig}>
+          {entwurf.geraete.length > 0 ? '👍 Fertig' : '🙅 Keine Geräte'}
+        </button>
+      )}
     </div>
   );
 }

@@ -148,16 +148,37 @@ function PlatzBuchung(): React.JSX.Element {
       const trainer = trainerListe.find((t) => t.id === kachel.trainerId);
       text += trainer ? `Trainer ${trainer.name}` : 'ohne Trainer';
     } else {
-      if (!neu.geraete.includes(kachel.geraetId)) {
+      // Geraete nur an- und abwaehlen, Bruno bekommt erst bei "Fertig" Bescheid
+      if (neu.geraete.includes(kachel.geraetId)) {
+        neu.geraete = neu.geraete.filter((id) => id !== kachel.geraetId);
+      } else {
         neu.geraete = [...neu.geraete, kachel.geraetId];
       }
-      const geraet = geraete.find((g) => g.id === kachel.geraetId);
-      text += `das Gerät ${geraet?.name}`;
+      setEntwurf(neu);
+      return;
     }
 
     setEntwurf(neu);
     handleSenden(text);
   };
+
+  // "Fertig" bei den Geraeten: jetzt Bruno sagen, welche es sind
+  const handleGeraeteFertig = (): void => {
+    if (entwurf.geraete.length === 0) {
+      handleSenden('Ich nehme: keine Geräte');
+      return;
+    }
+    const namen = geraete.filter((g) => entwurf.geraete.includes(g.id)).map((g) => g.name);
+    handleSenden(`Ich nehme die Geräte: ${namen.join(', ')}`);
+  };
+
+  // Am Anfang (leerer Chat) gleich Spielen oder Training anbieten, ohne Bruno zu fragen
+  const startKacheln: Kachel[] = [
+    { typ: 'art', art: 'spielen' },
+    { typ: 'art', art: 'training' },
+  ];
+  const angezeigteKacheln =
+    nachrichten.length === 0 ? startKacheln : ergaenzeKacheln(kacheln, entwurf, alleBuchungen);
 
   const handleStornieren = (id: number): void => {
     setBuchungen(buchungen.filter((b) => b.id !== id));
@@ -180,10 +201,11 @@ function PlatzBuchung(): React.JSX.Element {
         onZuruecksetzen={handleNeuesMatch}
       >
         <KachelListe
-          kacheln={ergaenzeKacheln(kacheln, entwurf, alleBuchungen)}
+          kacheln={angezeigteKacheln}
           entwurf={entwurf}
           alleBuchungen={alleBuchungen}
           onKlick={handleKachelKlick}
+          onGeraeteFertig={handleGeraeteFertig}
         />
       </Chatbox>
       <BuchungsEntwurf entwurf={entwurf} onBuchen={handleBuchen} isStreaming={isStreaming} />

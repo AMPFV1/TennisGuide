@@ -178,3 +178,11 @@ nav a.aktiv {
     background-color: #fff;
 }
 
+.kachel--gewaehlt {
+    background-color: #d6e9ff;
+    font-weight: bold;
+}
+.kachel--fertig {
+    border-style: dashed;
+}
+
