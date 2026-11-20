@@ -8,26 +8,12 @@ import {
   formatiereSpielform,
   formatiereUhrzeit,
 } from '../utils/formatierung.ts';
+import { istVollstaendig } from '../utils/verfuegbarkeit.ts';
 
 interface BuchungsEntwurfProps {
   entwurf: Buchungsentwurf;
   onBuchen: () => void;
   isStreaming: boolean; // solange Bruno schreibt, nicht buchen
-}
-
-// Prueft, ob alles ausgefuellt ist, was man fuer eine Buchung braucht
-function istVollstaendig(entwurf: Buchungsentwurf): boolean {
-  if (!entwurf.art || !entwurf.datum || entwurf.uhrzeit === null || !entwurf.platzId) {
-    return false;
-  }
-  if (entwurf.art === 'spielen') {
-    // Einzel = 2 Spieler, Doppel = 4 Spieler
-    if (entwurf.spielform === 'einzel') return entwurf.namen.length === 2;
-    if (entwurf.spielform === 'doppel') return entwurf.namen.length === 4;
-    return false;
-  }
-  // Training: 1 bis 4 Personen
-  return entwurf.namen.length >= 1 && entwurf.namen.length <= 4;
 }
 
 function BuchungsEntwurf({ entwurf, onBuchen, isStreaming }: BuchungsEntwurfProps): React.JSX.Element {

@@ -12,7 +12,7 @@ import { plaetze } from '../daten/plaetze.ts';
 import { trainerListe } from '../daten/trainer.ts';
 import { geraete } from '../daten/geraete.ts';
 import { belegungMock } from '../daten/belegungMock.ts';
-import { ergaenzeKacheln, pruefeEntwurf } from '../utils/verfuegbarkeit.ts';
+import { ergaenzeKacheln, istVollstaendig, pruefeEntwurf } from '../utils/verfuegbarkeit.ts';
 import {
   formatiereArt,
   formatiereDatumMitTag,
@@ -72,7 +72,8 @@ function PlatzBuchung(): React.JSX.Element {
   });
 
   const handleBuchen = (): void => {
-    if (!entwurf.art || !entwurf.datum || entwurf.uhrzeit === null || !entwurf.platzId) {
+    // dieselbe Pruefung wie beim Button (gibt es jetzt nur noch einmal)
+    if (!istVollstaendig(entwurf)) {
       return;
     }
 

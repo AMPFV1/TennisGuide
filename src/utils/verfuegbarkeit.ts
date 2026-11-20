@@ -192,3 +192,26 @@ export function ergaenzeKacheln(
   // die falschen Termine bleiben (ausgegraut) drin, dahinter die freien
   return [...kacheln, ...ersatz];
 }
+
+// Ein Entwurf, bei dem alles Wichtige ausgefuellt ist
+export type VollstaendigerEntwurf = Buchungsentwurf & {
+  art: 'spielen' | 'training';
+  datum: string;
+  uhrzeit: number;
+  platzId: string;
+};
+
+// Prueft, ob alles ausgefuellt ist
+export function istVollstaendig(entwurf: Buchungsentwurf): entwurf is VollstaendigerEntwurf {
+  if (!entwurf.art || !entwurf.datum || entwurf.uhrzeit === null || !entwurf.platzId) {
+    return false;
+  }
+  if (entwurf.art === 'spielen') {
+    // Einzel = 2 Spieler, Doppel = 4 Spieler
+    if (entwurf.spielform === 'einzel') return entwurf.namen.length === 2;
+    if (entwurf.spielform === 'doppel') return entwurf.namen.length === 4;
+    return false;
+  }
+  // Training: 1 bis 4 Personen
+  return entwurf.namen.length >= 1 && entwurf.namen.length <= 4;
+}
