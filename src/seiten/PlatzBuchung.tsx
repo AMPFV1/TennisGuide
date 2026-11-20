@@ -13,6 +13,12 @@ import { trainerListe } from '../daten/trainer.ts';
 import { geraete } from '../daten/geraete.ts';
 import { belegungMock } from '../daten/belegungMock.ts';
 import { ergaenzeKacheln, pruefeEntwurf } from '../utils/verfuegbarkeit.ts';
+import {
+  formatiereArt,
+  formatiereDatumMitTag,
+  formatiereSpielform,
+  formatiereUhrzeit,
+} from '../utils/formatierung.ts';
 
 function PlatzBuchung(): React.JSX.Element {
   const leererEntwurf: Buchungsentwurf = {
@@ -77,7 +83,7 @@ function PlatzBuchung(): React.JSX.Element {
     if (meldung) {
       // statt roter Meldung sagen wir es Bruno, der sucht dann was anderes
       sendeNachricht(
-        `Die Buchung hat nicht geklappt: ${platz?.name} am ${entwurf.datum} um ${entwurf.uhrzeit}:00 Uhr – ${meldung}`
+        `Die Buchung hat nicht geklappt: ${platz?.name} am ${formatiereDatumMitTag(entwurf.datum)} um ${formatiereUhrzeit(entwurf.uhrzeit)} – ${meldung}`
       );
       return;
     }
@@ -102,8 +108,9 @@ function PlatzBuchung(): React.JSX.Element {
     setEntwurf(leererEntwurf);
 
     // Bruno Bescheid sagen, dass gebucht wurde
-    let text = `Ich habe gerade gebucht: ${platz?.name} am ${neueBuchung.datum} um ${neueBuchung.uhrzeit}:00 Uhr`;
-    text += ` (${neueBuchung.art}) für ${neueBuchung.namen.join(', ')}.`;
+    let text = `Ich habe gerade gebucht: ${platz?.name} am ${formatiereDatumMitTag(neueBuchung.datum)}`;
+    text += ` um ${formatiereUhrzeit(neueBuchung.uhrzeit)} (${formatiereArt(neueBuchung.art)})`;
+    text += ` für ${neueBuchung.namen.join(', ')}.`;
     sendeNachricht(text);
   };
 
@@ -133,16 +140,16 @@ function PlatzBuchung(): React.JSX.Element {
         neu.trainerId = null;
         neu.geraete = [];
       }
-      text += kachel.art === 'spielen' ? 'Spielen' : 'Training';
+      text += formatiereArt(kachel.art);
     } else if (kachel.typ === 'spielform') {
       neu.spielform = kachel.spielform;
-      text += kachel.spielform === 'einzel' ? 'Einzel' : 'Doppel';
+      text += formatiereSpielform(kachel.spielform);
     } else if (kachel.typ === 'termin') {
       neu.datum = kachel.datum;
       neu.uhrzeit = kachel.uhrzeit;
       neu.platzId = kachel.platzId;
       const platz = plaetze.find((p) => p.id === kachel.platzId);
-      text += `${platz?.name} am ${kachel.datum} um ${kachel.uhrzeit}:00 Uhr`;
+      text += `${platz?.name} am ${formatiereDatumMitTag(kachel.datum)} um ${formatiereUhrzeit(kachel.uhrzeit)}`;
     } else if (kachel.typ === 'trainer') {
       neu.trainerId = kachel.trainerId;
       const trainer = trainerListe.find((t) => t.id === kachel.trainerId);

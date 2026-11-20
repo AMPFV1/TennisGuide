@@ -1,4 +1,5 @@
 import { wetterMock } from '../daten/wetterMock.ts';
+import { formatiereDatumKurz } from '../utils/formatierung.ts';
 
 function WetterLeiste(): React.JSX.Element {
   return (
@@ -12,13 +13,9 @@ function WetterLeiste(): React.JSX.Element {
           icon = '🌧️';
         }
 
-        // aus 2026-11-20 wird 20.11.
-        const teile = tag.datum.split('-');
-        const datumText = `${teile[2]}.${teile[1]}.`;
-
         return (
           <div key={tag.datum} className='wetter-tag'>
-            <span>{datumText}</span>
+            <span>{formatiereDatumKurz(tag.datum)}</span>
             <span className='wetter-icon'>{icon}</span>
             <span>{tag.temperatur}°</span>
           </div>

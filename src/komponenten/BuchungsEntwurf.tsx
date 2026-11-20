@@ -2,6 +2,12 @@ import { plaetze } from '../daten/plaetze.ts';
 import { trainerListe } from '../daten/trainer.ts';
 import { geraete } from '../daten/geraete.ts';
 import type { Buchungsentwurf } from '../typen/buchung.ts';
+import {
+  formatiereArt,
+  formatiereDatumMitTag,
+  formatiereSpielform,
+  formatiereUhrzeit,
+} from '../utils/formatierung.ts';
 
 interface BuchungsEntwurfProps {
   entwurf: Buchungsentwurf;
@@ -34,10 +40,12 @@ function BuchungsEntwurf({ entwurf, onBuchen, isStreaming }: BuchungsEntwurfProp
   return (
     <div className='buchungs-entwurf'>
       <h3>Deine Buchung</h3>
-      <p>Art: {entwurf.art ?? '– fehlt noch –'}</p>
-      {entwurf.art === 'spielen' && <p>Spielform: {entwurf.spielform ?? '– fehlt noch –'}</p>}
-      <p>Datum: {entwurf.datum ?? '– fehlt noch –'}</p>
-      <p>Uhrzeit: {entwurf.uhrzeit !== null ? `${entwurf.uhrzeit}:00 Uhr` : '– fehlt noch –'}</p>
+      <p>Art: {entwurf.art ? formatiereArt(entwurf.art) : '– fehlt noch –'}</p>
+      {entwurf.art === 'spielen' && (
+        <p>Spielform: {entwurf.spielform ? formatiereSpielform(entwurf.spielform) : '– fehlt noch –'}</p>
+      )}
+      <p>Datum: {entwurf.datum ? formatiereDatumMitTag(entwurf.datum) : '– fehlt noch –'}</p>
+      <p>Uhrzeit: {entwurf.uhrzeit !== null ? formatiereUhrzeit(entwurf.uhrzeit) : '– fehlt noch –'}</p>
       <p>Platz: {platz ? platz.name : '– fehlt noch –'}</p>
       <p>Namen: {entwurf.namen.length > 0 ? entwurf.namen.join(', ') : '– fehlt noch –'}</p>
       {entwurf.art === 'training' && (

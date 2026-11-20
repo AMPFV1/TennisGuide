@@ -1,5 +1,6 @@
 import type { Buchung } from '../typen/buchung.ts';
 import { plaetze } from '../daten/plaetze.ts';
+import { formatiereArt, formatiereDatumMitTag, formatiereUhrzeit } from '../utils/formatierung.ts';
 
 interface BuchungsListeProps {
   buchungen: Buchung[];
@@ -18,7 +19,8 @@ function BuchungsListe({ buchungen, onStornieren }: BuchungsListeProps): React.J
           const platz = plaetze.find((p) => p.id === buchung.platzId);
           return (
             <li key={buchung.id}>
-              {buchung.datum} um {buchung.uhrzeit}:00 Uhr – {platz?.name} – {buchung.art} –{' '}
+              {formatiereDatumMitTag(buchung.datum)} um {formatiereUhrzeit(buchung.uhrzeit)} –{' '}
+              {platz?.name} – {formatiereArt(buchung.art)} –{' '}
               {buchung.namen.join(', ')}{' '}
               <button onClick={() => onStornieren(buchung.id)}>Stornieren</button>
             </li>
