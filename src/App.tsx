@@ -8,8 +8,11 @@ import PlatzBuchung from './seiten/PlatzBuchung.tsx';
 function App(): React.JSX.Element {
   return (
     <>
+      <a className='skip-link' href='#inhalt'>
+        Zum Inhalt springen
+      </a>
       <Navigation />
-      <main>
+      <main id='inhalt' tabIndex={-1}>
         <Routes>
           <Route path='/' element={<Startseite />} />
           <Route path='/plaetze' element={<PlatzBuchung />} />
@@ -17,6 +20,9 @@ function App(): React.JSX.Element {
           <Route path='*' element={<Navigate to='/' replace />} />
         </Routes>
       </main>
+      <footer className='seitenfuss'>
+        <p>TC Netzroller – ein fiktiver Verein. Beispielprojekt für SED502 Frontend Development.</p>
+      </footer>
     </>
   );
 }

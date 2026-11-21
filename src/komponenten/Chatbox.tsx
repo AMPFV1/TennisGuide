@@ -15,6 +15,20 @@ interface ChatboxProps {
   children?: React.ReactNode; // wird unter der letzten Nachricht angezeigt (z.B. Kacheln)
 }
 
+// Übersetzt den rohen API-Fehler (z. B. "API Fehler: 429") in einen verständlichen Satz
+function freundlicheFehlermeldung(fehler: string): string {
+  if (fehler.includes('401') || fehler.includes('403')) {
+    return 'Bruno darf gerade nicht antworten (API-Schlüssel fehlt oder ist ungültig). Bitte später erneut versuchen.';
+  }
+  if (fehler.includes('429')) {
+    return 'Bruno hat gerade viel zu tun. Bitte warte kurz und schick deine Nachricht noch einmal.';
+  }
+  if (/fetch|network|Failed/i.test(fehler)) {
+    return 'Keine Verbindung zu Bruno. Bitte prüfe deine Internetverbindung und versuche es erneut.';
+  }
+  return 'Das hat leider nicht geklappt. Bitte versuche es noch einmal.';
+}
+
 function Chatbox({
   nachrichten,
   isStreaming,
@@ -75,7 +89,11 @@ function Chatbox({
         {/* Kacheln erst zeigen, wenn Bruno fertig geschrieben hat */}
         {!isStreaming && children}
 
-        {fehler && <p className='fehler'>🚫 Doppelfehler! {fehler}</p>}
+        {fehler && (
+          <p className='fehler' role='alert'>
+            🚫 {freundlicheFehlermeldung(fehler)}
+          </p>
+        )}
 
         <div ref={endeRef} />
       </div>

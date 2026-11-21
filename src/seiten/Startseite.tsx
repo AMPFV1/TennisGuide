@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 function Startseite(): React.JSX.Element {
   return (
     <>
-      <section id='verein' aria-label='Vorstellung des Vereins'>
+      <section id='verein' className='hero' aria-label='Vorstellung des Vereins'>
         <h2>Willkommen beim TC Netzroller!</h2>
         <p>
           Unser Name ist Programm: Bei uns rollt der Ball gerne mal über die
@@ -13,7 +13,16 @@ function Startseite(): React.JSX.Element {
           akzeptiert, ernst gemeint sind sie aber nie.
         </p>
 
-        <h3>Unsere Plätze</h3>
+        <p>
+          <Link className='button' to='/plaetze'>
+            Platz buchen
+          </Link>
+        </p>
+      </section>
+
+      <section className='karten' aria-label='Plätze, Trainer und Turniere'>
+        <article className='karte'>
+          <h3>Unsere Plätze</h3>
         <ul>
           <li>
             <strong>3 Außenplätze</strong> (Sand) – für alle, die Sonne lieben
@@ -24,28 +33,32 @@ function Startseite(): React.JSX.Element {
             denen der Wind wieder schuld gewesen wäre.
           </li>
         </ul>
-        <p>
-          <Link to='/plaetze'>Zur Platzbuchung</Link>
-        </p>
 
-        <h3>Unsere Trainer</h3>
+        </article>
+        <article className='karte'>
+          <h3>Unsere Trainer</h3>
         <p>
           Unsere Trainer bringen dir Vorhand, Rückhand, Aufschlag und Volley bei
           – egal ob du gerade anfängst oder schon Turniere spielst. Nur für
           Netzroller übernehmen sie keine Garantie.
         </p>
 
-        <h3>Unsere Turniere</h3>
+        </article>
+        <article className='karte'>
+          <h3>Unsere Turniere</h3>
         <p>
           Vom Frühjahrs-Cup über die Vereinsmeisterschaft bis zum
           Hallen-Doppel im Winter: Bei uns gibt es jedes Jahr mehrere Turniere.
           Die wichtigste Regel steht in keinem Regelbuch – wer im Finale
           verliert, zahlt die erste Runde im Vereinsheim.
         </p>
+        </article>
       </section>
 
       <h2>Tennis Guide</h2>
       <p>Ein paar allgemeine Tipps rund ums Tennisspielen:</p>
+
+      <div className='guide'>
 
       <section id='grundlagen' aria-label='Bereich Grundlagen'>
         <h2>Grundlagen</h2>
@@ -109,6 +122,7 @@ function Startseite(): React.JSX.Element {
           </p>
         </article>
       </section>
+      </div>
     </>
   );
 }

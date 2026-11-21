@@ -8,8 +8,8 @@ function Navigation(): React.JSX.Element {
     isActive ? 'aktiv' : '';
 
   return (
-    <header>
-      <h1>TC Netzroller</h1>
+    <header className='seitenkopf'>
+      <h1>🎾 TC Netzroller</h1>
       <nav aria-label='Hauptnavigation'>
         <ul>
           <li>

@@ -199,25 +199,31 @@ function PlatzBuchung(): React.JSX.Element {
         Sag unserem Platzwart Bruno, wann du spielen oder trainieren willst. Er
         trägt alles bei "Deine Buchung" ein, du musst nur noch auf "Jetzt buchen" klicken.
       </p>
-      <h3>Wetter</h3>
-      <WetterLeiste />
-      <Chatbox
-        nachrichten={nachrichten}
-        isStreaming={isStreaming}
-        fehler={fehler}
-        onSenden={handleSenden}
-        onZuruecksetzen={handleNeuesMatch}
-      >
-        <KachelListe
-          kacheln={angezeigteKacheln}
-          entwurf={entwurf}
-          alleBuchungen={alleBuchungen}
-          onKlick={handleKachelKlick}
-          onGeraeteFertig={handleGeraeteFertig}
-        />
-      </Chatbox>
-      <BuchungsEntwurf entwurf={entwurf} onBuchen={handleBuchen} isStreaming={isStreaming} />
-      <BuchungsListe buchungen={buchungen} onStornieren={handleStornieren} />
+      <div className='buchung-layout'>
+        <Chatbox
+          nachrichten={nachrichten}
+          isStreaming={isStreaming}
+          fehler={fehler}
+          onSenden={handleSenden}
+          onZuruecksetzen={handleNeuesMatch}
+        >
+          <KachelListe
+            kacheln={angezeigteKacheln}
+            entwurf={entwurf}
+            alleBuchungen={alleBuchungen}
+            onKlick={handleKachelKlick}
+            onGeraeteFertig={handleGeraeteFertig}
+          />
+        </Chatbox>
+        <div className='buchung-seite'>
+          <BuchungsEntwurf entwurf={entwurf} onBuchen={handleBuchen} isStreaming={isStreaming} />
+          <div>
+            <h3>Wetter</h3>
+            <WetterLeiste />
+          </div>
+          <BuchungsListe buchungen={buchungen} onStornieren={handleStornieren} />
+        </div>
+      </div>
     </section>
   );
 }

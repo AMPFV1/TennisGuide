@@ -16,6 +16,16 @@ interface BuchungsEntwurfProps {
   isStreaming: boolean; // solange Bruno schreibt, nicht buchen
 }
 
+// Eine Zeile der Checkliste: ✔ mit Wert oder "fehlt noch" (Text, nicht nur Farbe)
+function zeile(bezeichnung: string, wert: string | null): React.JSX.Element {
+  return (
+    <>
+      <dt>{bezeichnung}</dt>
+      <dd className={wert ? 'entwurf-ok' : 'entwurf-fehlt'}>{wert ?? 'fehlt noch'}</dd>
+    </>
+  );
+}
+
 function BuchungsEntwurf({ entwurf, onBuchen, isStreaming }: BuchungsEntwurfProps): React.JSX.Element {
   const platz = plaetze.find((p) => p.id === entwurf.platzId);
   const trainer = trainerListe.find((t) => t.id === entwurf.trainerId);
@@ -26,20 +36,23 @@ function BuchungsEntwurf({ entwurf, onBuchen, isStreaming }: BuchungsEntwurfProp
   return (
     <div className='buchungs-entwurf'>
       <h3>Deine Buchung</h3>
-      <p>Art: {entwurf.art ? formatiereArt(entwurf.art) : '– fehlt noch –'}</p>
-      {entwurf.art === 'spielen' && (
-        <p>Spielform: {entwurf.spielform ? formatiereSpielform(entwurf.spielform) : '– fehlt noch –'}</p>
-      )}
-      <p>Datum: {entwurf.datum ? formatiereDatumMitTag(entwurf.datum) : '– fehlt noch –'}</p>
-      <p>Uhrzeit: {entwurf.uhrzeit !== null ? formatiereUhrzeit(entwurf.uhrzeit) : '– fehlt noch –'}</p>
-      <p>Platz: {platz ? platz.name : '– fehlt noch –'}</p>
-      <p>Namen: {entwurf.namen.length > 0 ? entwurf.namen.join(', ') : '– fehlt noch –'}</p>
-      {entwurf.art === 'training' && (
-        <>
-          <p>Trainer: {trainer ? `${trainer.name} (${trainer.fachgebiet})` : 'ohne Trainer'}</p>
-          <p>Geräte: {geraeteNamen.length > 0 ? geraeteNamen.join(', ') : 'keine'}</p>
-        </>
-      )}
+      <dl className='entwurf-liste'>
+        {zeile('Art', entwurf.art ? formatiereArt(entwurf.art) : null)}
+        {entwurf.art === 'spielen' &&
+          zeile('Spielform', entwurf.spielform ? formatiereSpielform(entwurf.spielform) : null)}
+        {zeile('Datum', entwurf.datum ? formatiereDatumMitTag(entwurf.datum) : null)}
+        {zeile('Uhrzeit', entwurf.uhrzeit !== null ? formatiereUhrzeit(entwurf.uhrzeit) : null)}
+        {zeile('Platz', platz ? platz.name : null)}
+        {zeile('Namen', entwurf.namen.length > 0 ? entwurf.namen.join(', ') : null)}
+        {entwurf.art === 'training' && (
+          <>
+            <dt>Trainer</dt>
+            <dd>{trainer ? `${trainer.name} (${trainer.fachgebiet})` : 'ohne Trainer'}</dd>
+            <dt>Geräte</dt>
+            <dd>{geraeteNamen.length > 0 ? geraeteNamen.join(', ') : 'keine'}</dd>
+          </>
+        )}
+      </dl>
       <button onClick={onBuchen} disabled={!istVollstaendig(entwurf) || isStreaming}>
         {isStreaming ? 'Bruno schreibt noch …' : 'Jetzt buchen'}
       </button>
