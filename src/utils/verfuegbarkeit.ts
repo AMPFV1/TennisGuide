@@ -1,10 +1,9 @@
 // Prueft, ob eine Buchung wirklich moeglich ist
 // (Bruno kann sich verrechnen, deshalb prueft hier nochmal der Code)
-import type { Buchung, Buchungsentwurf, Kachel } from '../typen/buchung.ts';
+import type { Buchung, Buchungsentwurf, Kachel, Wetter } from '../typen/buchung.ts';
 import { plaetze } from '../daten/plaetze.ts';
 import { trainerListe } from '../daten/trainer.ts';
 import { geraete } from '../daten/geraete.ts';
-import { wetterMock } from '../daten/wetterMock.ts';
 
 
 function datumAlsText(datum: Date): string {
@@ -29,11 +28,12 @@ export function istUhrzeitVorbei(datum: string, uhrzeit: number): boolean {
   return datum === datumAlsText(jetzt) && uhrzeit <= jetzt.getHours();
 }
 
-// Aussenplatz bei Regen gesperrt
-export function istAussenplatzGesperrt(platzId: string, datum: string): boolean {
+// Aussenplatz bei Regen und Schnee gesperrt.
+// Ist fuer den Tag keine Vorhersage da (z. B. API-Fehler), sperren wir nichts.
+export function istAussenplatzGesperrt(platzId: string, datum: string, wetter: Wetter[]): boolean {
   const platz = plaetze.find((p) => p.id === platzId);
-  const wetter = wetterMock.find((w) => w.datum === datum);
-  return platz?.art === 'aussen' && wetter?.wetter === 'regen';
+  const tag = wetter.find((w) => w.datum === datum);
+  return platz?.art === 'aussen' && (tag?.wetter === 'regen' || tag?.wetter === 'schnee');
 }
 
 export function istPlatzFrei(
@@ -78,7 +78,11 @@ export function freieGeraete(
 }
 
 // Prueft den ganzen Entwurf. Gibt eine Fehlermeldung zurueck oder null wenn alles passt.
-export function pruefeEntwurf(entwurf: Buchungsentwurf, alleBuchungen: Buchung[]): string | null {
+export function pruefeEntwurf(
+  entwurf: Buchungsentwurf,
+  alleBuchungen: Buchung[],
+  wetter: Wetter[]
+): string | null {
   const { datum, uhrzeit, platzId } = entwurf;
   if (!datum || uhrzeit === null || !platzId) {
     return 'Es fehlen noch Angaben.';
@@ -92,8 +96,8 @@ export function pruefeEntwurf(entwurf: Buchungsentwurf, alleBuchungen: Buchung[]
   if (istUhrzeitVorbei(datum, uhrzeit)) {
     return 'Diese Uhrzeit ist heute schon vorbei.';
   }
-  if (istAussenplatzGesperrt(platzId, datum)) {
-    return 'Wegen Regen sind die Außenplätze an diesem Tag gesperrt.';
+  if (istAussenplatzGesperrt(platzId, datum, wetter)) {
+    return 'Wegen Regen oder Schnee sind die Außenplätze an diesem Tag gesperrt.';
   }
   if (!istPlatzFrei(platzId, datum, uhrzeit, alleBuchungen)) {
     return 'Der Platz ist zu dieser Zeit schon belegt.';
@@ -116,7 +120,8 @@ export function pruefeEntwurf(entwurf: Buchungsentwurf, alleBuchungen: Buchung[]
 export function istKachelGueltig(
   kachel: Kachel,
   entwurf: Buchungsentwurf,
-  alleBuchungen: Buchung[]
+  alleBuchungen: Buchung[],
+  wetter: Wetter[]
 ): boolean {
   if (kachel.typ === 'termin') {
     const platzGibtEs = plaetze.some((p) => p.id === kachel.platzId);
@@ -124,7 +129,7 @@ export function istKachelGueltig(
     if (!istImBuchungszeitraum(kachel.datum)) return false;
     if (kachel.uhrzeit < 8 || kachel.uhrzeit > 21) return false;
     if (istUhrzeitVorbei(kachel.datum, kachel.uhrzeit)) return false;
-    if (istAussenplatzGesperrt(kachel.platzId, kachel.datum)) return false;
+    if (istAussenplatzGesperrt(kachel.platzId, kachel.datum, wetter)) return false;
     if (!istPlatzFrei(kachel.platzId, kachel.datum, kachel.uhrzeit, alleBuchungen)) return false;
     // wenn schon ein Trainer ausgesucht ist, muss der auch Zeit haben
     if (entwurf.trainerId && !istTrainerFrei(entwurf.trainerId, kachel.datum, kachel.uhrzeit, alleBuchungen)) {
@@ -158,13 +163,14 @@ export function freieTermine(
   abUhr: number,
   entwurf: Buchungsentwurf,
   alleBuchungen: Buchung[],
+  wetter: Wetter[],
   anzahl: number
 ): Kachel[] {
   const ergebnis: Kachel[] = [];
   for (let uhr = Math.max(abUhr, 8); uhr <= 21 && ergebnis.length < anzahl; uhr++) {
     for (const platz of plaetze) {
       const kachel: Kachel = { typ: 'termin', datum, uhrzeit: uhr, platzId: platz.id };
-      if (istKachelGueltig(kachel, entwurf, alleBuchungen)) {
+      if (istKachelGueltig(kachel, entwurf, alleBuchungen, wetter)) {
         ergebnis.push(kachel);
         break;
       }
@@ -178,17 +184,18 @@ export function freieTermine(
 export function ergaenzeKacheln(
   kacheln: Kachel[],
   entwurf: Buchungsentwurf,
-  alleBuchungen: Buchung[]
+  alleBuchungen: Buchung[],
+  wetter: Wetter[]
 ): Kachel[] {
   const termine = kacheln.filter((k) => k.typ === 'termin');
   if (termine.length === 0) return kacheln;
 
-  const gueltige = termine.filter((k) => istKachelGueltig(k, entwurf, alleBuchungen));
+  const gueltige = termine.filter((k) => istKachelGueltig(k, entwurf, alleBuchungen, wetter));
   if (gueltige.length > 0) return kacheln;
 
   const erster = termine[0];
   if (erster.typ !== 'termin') return kacheln;
-  const ersatz = freieTermine(erster.datum, erster.uhrzeit, entwurf, alleBuchungen, 3);
+  const ersatz = freieTermine(erster.datum, erster.uhrzeit, entwurf, alleBuchungen, wetter, 3);
   // die falschen Termine bleiben (ausgegraut) drin, dahinter die freien
   return [...kacheln, ...ersatz];
 }
