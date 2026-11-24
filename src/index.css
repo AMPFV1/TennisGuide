@@ -265,6 +265,18 @@ button:disabled {
   background-color: var(--fehler-hell);
   border-color: var(--fehler);
 }
+.wetter-tag--laedt {
+  min-height: 104px;
+  border-color: transparent;
+  background: linear-gradient(90deg, #e4e7eb 25%, #f0f2f5 50%, #e4e7eb 75%);
+  background-size: 200% 100%;
+  animation: wetter-laedt 1.2s linear infinite;
+}
+@keyframes wetter-laedt {
+  to {
+    background-position: -200% 0;
+  }
+}
 .wetter-icon {
   font-size: 1.5rem;
 }

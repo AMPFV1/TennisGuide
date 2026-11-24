@@ -26,7 +26,9 @@ Verein und zu den Grundlagen des Tennisspiels und buchen Plätze, ohne Formulare
   (Zeitraum heute bis +7 Tage, keine vergangene Uhrzeit, Platz, Trainer und Geräte frei,
   Außenplätze bei Regen gesperrt). Schlägt die Prüfung fehl, erfährt Bruno davon und
   schlägt eine Alternative vor.
-- **Wetterleiste** mit den nächsten acht Tagen. Sie steuert die Sperre der Außenplätze.
+- **Wetterleiste mit echter Vorhersage** (Open-Meteo, heute + 7 Tage). Bei Regen und Schnee sind die
+  Außenplätze gesperrt. Beim Laden zeigt die Leiste Platzhalter, bei einem Fehler eine
+  verständliche Meldung mit „Nochmal versuchen“. Bruno kennt dieselbe Vorhersage.
 - **Eigene Buchungen** werden aufgelistet und lassen sich stornieren.
 
 ### Stand der Umsetzung
@@ -35,16 +37,17 @@ Verein und zu den Grundlagen des Tennisspiels und buchen Plätze, ohne Formulare
 | ------------------------------------------ | --------------------------------------------------------------------- |
 | React + TypeScript + Vite                  | umgesetzt                                                             |
 | Mindestens 3 Seiten mit React Router       | in Arbeit (derzeit Startseite, Platzbuchung und Weiterleitung)        |
-| Custom Hook                                | `useAI` umgesetzt                                                     |
+| Custom Hooks                               | `useAI` und `useWetter` umgesetzt                                     |
 | KI-Feature mit Streaming                   | umgesetzt (Bruno über OpenRouter)                                     |
-| Externe REST-API mit loading/success/error | **offen:** Wetter und Belegung sind noch Mock-Daten (`src/daten/`)    |
+| Externe REST-API mit loading/success/error | umgesetzt (Wetter von Open-Meteo, `useWetter`). Belegung ist Mock    |
 | `.env` für den API-Schlüssel               | umgesetzt (`.env.example` als Vorlage)                                |
 
 ## Voraussetzungen
 
 - Node.js **20.19 oder neuer** (`node -v`, getestet mit Node 22)
 - npm 10 oder neuer (`npm -v`)
-- Ein kostenloser API-Schlüssel von [OpenRouter](https://openrouter.ai/keys)
+- Ein kostenloser API-Schlüssel von [OpenRouter](https://openrouter.ai/keys) für Bruno. Die
+  Wetter-API [Open-Meteo](https://open-meteo.com) braucht keinen Schlüssel.
 
 ## Lokal starten
 
@@ -99,13 +102,15 @@ src/seiten/                    Startseite, PlatzBuchung (Seiten der Routen)
 src/komponenten/               Navigation, Chatbox, NachrichtBlaeschen, KachelListe,
                                BuchungsEntwurf, BuchungsListe, WetterLeiste
 src/hooks/useAI.ts             Custom Hook: Chatverlauf, Streaming-Status, Fehler
+src/hooks/useWetter.ts         Custom Hook: Wettervorhersage mit loading/success/error
 src/utils/aiStream.ts          Streaming-Aufruf der OpenRouter-API (fetch, SSE)
+src/utils/wetterApi.ts         Abruf der Open-Meteo-Vorhersage, Umrechnung der Wettercodes
 src/utils/brunoPrompt.ts       System-Prompt für Bruno (Datum, Wetter, Belegung, Regeln)
 src/utils/datenblock.ts        liest den versteckten JSON-Block aus Brunos Antwort
 src/utils/verfuegbarkeit.ts    Prüfung: Zeitraum, Platz, Trainer, Geräte, Wetter
 src/utils/formatierung.ts      Formatierung von Datum, Uhrzeit, Buchungsart
 src/typen/                     Interfaces und Union-Typen (Buchung, Platz, Trainer, Nachricht)
-src/daten/                     Plätze, Trainer, Geräte sowie Mock-Daten für Wetter und Belegung
+src/daten/                     Plätze, Trainer, Geräte sowie Mock-Daten für die Belegung
 ```
 
 ## Technische Entscheidungen
@@ -123,6 +128,9 @@ src/daten/                     Plätze, Trainer, Geräte sowie Mock-Daten für W
 - **Custom Hook `useAI`.** Kapselt Verlauf, Streaming-Status, Fehler und Zurücksetzen und ist
   nicht an Bruno gebunden. Die Seite übergibt System-Prompt und einen Callback, der aufgerufen
   wird, wenn die Antwort vollständig ist.
+- **Wetter-API mit drei Zuständen.** `useWetter` lädt die Vorhersage mit `fetch` und `AbortController`
+  und leitet `loading`, `success` und `error` aus dem Ergebnis ab. Die Antwort wird geprüft, bevor
+  sie verwendet wird. Fehlt die Vorhersage, sperrt der Code keine Plätze und Bruno sagt das ehrlich.
 - **Streaming per `fetch` und `ReadableStream`.** Die Server-Sent-Events der API werden
   zeilenweise gelesen und Chunk für Chunk an den Hook weitergegeben.
 - **Strukturierte Antwort.** Bruno hängt an jede Antwort einen `<daten>`-Block mit JSON an
