@@ -22,6 +22,11 @@ function Navigation(): React.JSX.Element {
               Platz buchen
             </NavLink>
           </li>
+          <li>
+            <NavLink to='/trainer' className={linkKlasse}>
+              Trainer
+            </NavLink>
+          </li>
         </ul>
       </nav>
     </header>

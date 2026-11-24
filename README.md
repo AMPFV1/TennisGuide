@@ -30,13 +30,14 @@ Verein und zu den Grundlagen des Tennisspiels und buchen Plätze, ohne Formulare
   Außenplätze gesperrt. Beim Laden zeigt die Leiste Platzhalter, bei einem Fehler eine
   verständliche Meldung mit „Nochmal versuchen“. Bruno kennt dieselbe Vorhersage.
 - **Eigene Buchungen** werden aufgelistet und lassen sich stornieren.
+- **Trainerseite** mit allen Trainern, Fachgebiet und Zeiten und einem Button „Training buchen“.
 
 ### Stand der Umsetzung
 
 | Anforderung ESA 2                          | Stand                                                                 |
 | ------------------------------------------ | --------------------------------------------------------------------- |
 | React + TypeScript + Vite                  | umgesetzt                                                             |
-| Mindestens 3 Seiten mit React Router       | in Arbeit (derzeit Startseite, Platzbuchung und Weiterleitung)        |
+| Mindestens 3 Seiten mit React Router       | umgesetzt (Startseite, Platzbuchung, Trainer)                         |
 | Custom Hooks                               | `useAI` und `useWetter` umgesetzt                                     |
 | KI-Feature mit Streaming                   | umgesetzt (Bruno über OpenRouter)                                     |
 | Externe REST-API mit loading/success/error | umgesetzt (Wetter von Open-Meteo, `useWetter`). Belegung ist Mock    |
@@ -95,7 +96,7 @@ npm run preview    # liefert dist/ lokal aus
 index.html                     Einstieg der Single-Page-Anwendung
 src/main.tsx                   Start von React, BrowserRouter
 src/App.tsx                    Navigation und Routen
-src/seiten/                    Startseite, PlatzBuchung (Seiten der Routen)
+src/seiten/                    Startseite, PlatzBuchung, TrainerUebersicht (Seiten der Routen)
 src/komponenten/               Navigation, Chatbox, NachrichtBlaeschen, KachelListe,
                                BuchungsEntwurf, BuchungsListe, WetterLeiste
 src/hooks/useAI.ts             Custom Hook: Chatverlauf, Streaming-Status, Fehler

@@ -4,6 +4,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Navigation from './komponenten/Navigation.tsx';
 import Startseite from './seiten/Startseite.tsx';
 import PlatzBuchung from './seiten/PlatzBuchung.tsx';
+import TrainerUebersicht from './seiten/TrainerUebersicht.tsx';
 
 function App(): React.JSX.Element {
   return (
@@ -16,6 +17,7 @@ function App(): React.JSX.Element {
         <Routes>
           <Route path='/' element={<Startseite />} />
           <Route path='/plaetze' element={<PlatzBuchung />} />
+          <Route path='/trainer' element={<TrainerUebersicht />} />
           {/* Unbekannte URL -> zurueck zur Startseite */}
           <Route path='*' element={<Navigate to='/' replace />} />
         </Routes>
