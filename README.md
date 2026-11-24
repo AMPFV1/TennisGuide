@@ -66,9 +66,6 @@ Danach im Browser <http://localhost:5173> öffnen.
 Die Datei `.env` im Projektstamm enthält den Schlüssel und ist über `.gitignore` vom Repository
 ausgeschlossen. Sie wird **nicht** eingecheckt.
 
-```bash
-VITE_OPENROUTER_API_KEY=sk-or-...
-```
 
 Ohne Schlüssel startet die App trotzdem, Bruno antwortet dann mit einer Fehlermeldung.
 Nach Änderungen an `.env` muss der Entwicklungsserver neu gestartet werden.
@@ -141,6 +138,26 @@ src/daten/                     Plätze, Trainer, Geräte sowie Mock-Daten für d
 - **Semantisches HTML und Barrierefreiheit.** `header`, `nav`, `main`, `section`, `article`,
   `aria-label` an Navigation und Bereichen, Text nur für Screenreader über `.visuell-versteckt`.
 
+## Bedacht, aber nicht umgesetzt
+
+Für einen echten Einsatz im Verein wären noch nötig:
+
+**Benutzer**
+- Benutzeranmeldung für Mitglieder
+- Rollen (Mitglied, Trainer, Platzwart, Vorstand)
+- Regeln für Gäste
+
+**Daten**
+- Echte Datenbank mit Backend statt Mock-Daten und React-State
+- Doppelbuchungen am Server verhindern
+
+**Vereinsbetrieb**
+- Buchungsbestätigung per E-Mail
+- Stornoregeln, Kontingente und Warteliste
+- Gebühren für Halle, Trainer und Gäste
+- Verwaltung für den Platzwart (Plätze sperren, Turniere eintragen)
+- Arbeitstage und Urlaub der Trainer
+
 ## Aufgabenverteilung
 
 > **Offen:** Bitte vor der Abgabe von beiden Personen ausfüllen. Es zählen erkennbare,
@@ -171,7 +188,7 @@ prüft der Code (siehe oben).
 
 | Person          | Tool / Modell | Art der Nutzung |
 | --------------- | ------------- | --------------- |
-| Jürgen          | _einzutragen_ | _einzutragen_   |
+| Jürgen          | Claude Code, Claude Opus 5.5 | Hilfe bei der Fehlersuche und Fehlerbehebung, bei Problemlösungen sowie Lösungsvorschläge |
 | Mathias Rangger | Claude Code, Claude Sonnet 5.5 | README überarbeitet und strukturiert (Ausgangsbasis: Code und Commit-Historie) |
 
 ## Hinweis
