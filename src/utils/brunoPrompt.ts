@@ -1,10 +1,10 @@
 // Baut den System-Prompt fuer Platzwart Bruno
 // (vorher stand das alles in der Chatbox, aber da kommt man nicht an meine Buchungen ran)
-import type { Buchung } from '../typen/buchung.ts';
+import type { Buchung, Wetter } from '../typen/buchung.ts';
+import type { WetterStatus } from '../hooks/useWetter.ts';
 import { plaetze } from '../daten/plaetze.ts';
 import { trainerListe } from '../daten/trainer.ts';
 import { geraete } from '../daten/geraete.ts';
-import { wetterMock } from '../daten/wetterMock.ts';
 import { belegungMock } from '../daten/belegungMock.ts';
 
 // eine Buchung als Textzeile fuer Bruno
@@ -22,7 +22,11 @@ function buchungAlsText(b: Buchung): string {
   return zeile;
 }
 
-export function erstelleBrunoPrompt(eigeneBuchungen: Buchung[]): string {
+export function erstelleBrunoPrompt(
+  eigeneBuchungen: Buchung[],
+  wetter: Wetter[],
+  wetterStatus: WetterStatus
+): string {
   // Datum UND Uhrzeit, sonst weiss Bruno nicht was "in einer Stunde" heisst
   const jetzt = new Date();
   const heute = jetzt.toLocaleDateString('de-AT', {
@@ -49,9 +53,17 @@ export function erstelleBrunoPrompt(eigeneBuchungen: Buchung[]): string {
   }
   const kalenderText = kalenderZeilen.join('\n');
 
-  const wetterText = wetterMock
+  // Ohne Vorhersage soll Bruno nichts erfinden, sondern das ehrlich sagen
+  let wetterText = wetter
     .map((tag) => `- ${tag.datum}: ${tag.wetter}, ${tag.temperatur} Grad`)
     .join('\n');
+  if (wetterStatus === 'loading') {
+    wetterText = 'Die Wettervorhersage wird gerade noch geladen. Erfinde kein Wetter.';
+  } else if (wetterStatus === 'error') {
+    wetterText =
+      'Die Wettervorhersage ist gerade nicht verfügbar. Sag das ehrlich, erfinde kein Wetter ' +
+      'und weise bei Außenplätzen darauf hin, dass sie wetterabhängig sind.';
+  }
 
   // die ids braucht Bruno fuer den Datenblock
   const plaetzeText = plaetze
@@ -108,7 +120,7 @@ ausmachen wolltest – heute geht nichts mehr, aber morgen schon.
 
 WETTER:
 ${wetterText}
-Bei Regen sind die Außenplätze gesperrt!
+Bei Regen und Schnee sind die Außenplätze gesperrt!
 
 TRAINER:
 ${trainerText}

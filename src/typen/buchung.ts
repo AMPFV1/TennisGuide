@@ -23,9 +23,12 @@ export interface Geraet {
 
 export interface Wetter {
   datum: string; // JJJJ-MM-TT
-  wetter: 'sonnig' | 'bewoelkt' | 'regen';
-  temperatur: number;
+  wetter: WetterArt;
+  temperatur: number; // Tageshöchstwert in °C
 }
+
+// Die Außenplätze sind bei 'regen' und 'schnee' gesperrt
+export type WetterArt = 'sonnig' | 'bewoelkt' | 'regen' | 'schnee';
 
 // Was fuer die Buchung schon bekannt ist (null = noch nicht ausgewaehlt)
 // (war vorher in BuchungsEntwurf.tsx, wird jetzt aber auch woanders gebraucht)

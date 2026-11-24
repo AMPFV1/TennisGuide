@@ -6,6 +6,7 @@ import BuchungsListe from '../komponenten/BuchungsListe.tsx';
 import KachelListe from '../komponenten/KachelListe.tsx';
 import type { Buchung, Buchungsentwurf, Kachel } from '../typen/buchung.ts';
 import useAI from '../hooks/useAI.ts';
+import useWetter from '../hooks/useWetter.ts';
 import { erstelleBrunoPrompt } from '../utils/brunoPrompt.ts';
 import { leseDatenblock, leseKacheln } from '../utils/datenblock.ts';
 import { plaetze } from '../daten/plaetze.ts';
@@ -44,9 +45,12 @@ function PlatzBuchung(): React.JSX.Element {
   // Buchungen von allen anderen + meine (fuer die Pruefungen)
   const alleBuchungen = [...belegungMock, ...buchungen];
 
+  // Wettervorhersage von der Wetter-API (loading / success / error)
+  const { wetter, status: wetterStatus, neuLaden: wetterNeuLaden } = useWetter();
+
   // Chat mit Bruno ist jetzt hier, damit Bruno auch meine Buchungen kennt
   const { nachrichten, isStreaming, fehler, sendeNachricht, zuruecksetzen } = useAI({
-    systemPrompt: erstelleBrunoPrompt(buchungen),
+    systemPrompt: erstelleBrunoPrompt(buchungen, wetter, wetterStatus),
     // wenn Bruno fertig ist, seinen Datenblock in den Entwurf uebernehmen
     onAntwortFertig: (antwort) => {
       // neue Kacheln (oder keine) von Bruno
@@ -80,7 +84,7 @@ function PlatzBuchung(): React.JSX.Element {
     const platz = plaetze.find((p) => p.id === entwurf.platzId);
 
     // pruefen ob wirklich alles frei ist (Buchungen von allen + meine)
-    const meldung = pruefeEntwurf(entwurf, alleBuchungen);
+    const meldung = pruefeEntwurf(entwurf, alleBuchungen, wetter);
     if (meldung) {
       // statt roter Meldung sagen wir es Bruno, der sucht dann was anderes
       sendeNachricht(
@@ -186,7 +190,7 @@ function PlatzBuchung(): React.JSX.Element {
     { typ: 'art', art: 'training' },
   ];
   const angezeigteKacheln =
-    nachrichten.length === 0 ? startKacheln : ergaenzeKacheln(kacheln, entwurf, alleBuchungen);
+    nachrichten.length === 0 ? startKacheln : ergaenzeKacheln(kacheln, entwurf, alleBuchungen, wetter);
 
   const handleStornieren = (id: number): void => {
     setBuchungen(buchungen.filter((b) => b.id !== id));
@@ -211,6 +215,7 @@ function PlatzBuchung(): React.JSX.Element {
             kacheln={angezeigteKacheln}
             entwurf={entwurf}
             alleBuchungen={alleBuchungen}
+            wetter={wetter}
             onKlick={handleKachelKlick}
             onGeraeteFertig={handleGeraeteFertig}
           />
@@ -219,7 +224,7 @@ function PlatzBuchung(): React.JSX.Element {
           <BuchungsEntwurf entwurf={entwurf} onBuchen={handleBuchen} isStreaming={isStreaming} />
           <div>
             <h3>Wetter</h3>
-            <WetterLeiste />
+            <WetterLeiste wetter={wetter} status={wetterStatus} onNeuLaden={wetterNeuLaden} />
           </div>
           <BuchungsListe buchungen={buchungen} onStornieren={handleStornieren} />
         </div>
