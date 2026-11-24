@@ -71,11 +71,6 @@ ausgeschlossen. Sie wird **nicht** eingecheckt.
 Ohne Schlüssel startet die App trotzdem, Bruno antwortet dann mit einer Fehlermeldung.
 Nach Änderungen an `.env` muss der Entwicklungsserver neu gestartet werden.
 
-> **Hinweis:** Variablen mit dem Präfix `VITE_` werden von Vite in den Browser-Code eingebettet.
-> Der Schlüssel ist damit im ausgelieferten Bundle sichtbar. Für ESA 2 mit einem kostenlosen
-> Schlüssel ist das vertretbar. Für das Deployment in ESA 3 ist ein kleiner Proxy
-> (Serverless-Funktion) die bessere Lösung.
-
 ## Build und Vorschau
 
 ```bash
@@ -182,10 +177,6 @@ Geräte und die belegten Zeiten enthält. Ergebnis: Bruno führt durch die Buchu
 prüft der Code (siehe oben).
 
 ### Bei der Entwicklung
-
-> **Offen:** Pflichtangaben laut LV-Konzept pro Gruppenmitglied ergänzen: Toolname, verwendetes
-> Modell, Art der Nutzung (zum Beispiel „Textkorrektur“, „Codebeispiel generiert“) und
-> gekennzeichnete Textstellen.
 
 | Person          | Tool / Modell | Art der Nutzung |
 | --------------- | ------------- | --------------- |

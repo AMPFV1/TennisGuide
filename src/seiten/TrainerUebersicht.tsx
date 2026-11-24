@@ -27,8 +27,9 @@ function TrainerUebersicht(): React.JSX.Element {
               <strong>Zeiten:</strong> täglich {trainer.vonUhr}:00 bis {trainer.bisUhr + 1}:00 Uhr
             </p>
             <p>
-              <Link className='button' to='/plaetze'>
-                Training buchen
+              {/* state: die Buchungsseite weiss dann, welcher Trainer gemeint ist */}
+              <Link className='button' to='/plaetze' state={{ trainerId: trainer.id }}>
+                Training mit {trainer.name.split(' ')[0]} buchen
               </Link>
             </p>
           </article>

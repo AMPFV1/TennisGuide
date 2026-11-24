@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Chatbox from '../komponenten/Chatbox.tsx';
 import WetterLeiste from '../komponenten/WetterLeiste.tsx';
 import BuchungsEntwurf from '../komponenten/BuchungsEntwurf.tsx';
@@ -195,6 +196,30 @@ function PlatzBuchung(): React.JSX.Element {
   const handleStornieren = (id: number): void => {
     setBuchungen(buchungen.filter((b) => b.id !== id));
   };
+
+  // Kommt man von der Trainerseite, steht im state, welcher Trainer gewaehlt wurde.
+  // Dann gleich Training mit diesem Trainer eintragen und Bruno Bescheid sagen.
+  const location = useLocation();
+  const navigate = useNavigate();
+  // Merker, damit die Nachricht nur einmal geschickt wird
+  // (im StrictMode laeuft useEffect beim Entwickeln zweimal)
+  const trainerSchonGesendet = useRef<boolean>(false);
+
+  useEffect(() => {
+    const state = location.state as { trainerId?: string } | null;
+    const trainer = trainerListe.find((t) => t.id === state?.trainerId);
+    if (!trainer || trainerSchonGesendet.current) return;
+    trainerSchonGesendet.current = true;
+
+    setEntwurf({ ...leererEntwurf, art: 'training', trainerId: trainer.id });
+    handleSenden(`Ich möchte ein Training mit ${trainer.name} buchen.`);
+
+    // state wieder loeschen, sonst kommt die Nachricht beim Neuladen nochmal
+    navigate('.', { replace: true, state: null });
+    // leeres Array: nur einmal beim Oeffnen der Seite ausfuehren. Die Warnung wegen
+    // fehlender Abhaengigkeiten ist hier Absicht (Oxlint versteht eslint-disable)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <section>
